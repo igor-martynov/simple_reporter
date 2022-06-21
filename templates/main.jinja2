@@ -1,0 +1,16 @@
+Simple Monitor v. {{ version }}.
+Host: {{ host }}.
+Date: {{ datetime }}.
+OS: {{ os_type }}.
+Tests loaded: {{ tests | length }}
+
+
+BRIEF REPORT:
+{% for test in tests %}{% if test.report_brief|length != 0 %}{{ test.report_brief }}{% endif %}{% endfor %}
+
+
+
+FULL REPORT:
+{% for test in tests %}
+{% if not test.ignored %}{{ test.report }}{%else%}TEST IGNORED: {{ test.name }} ({{ test.descr }}){% endif %}
+{% endfor %}
