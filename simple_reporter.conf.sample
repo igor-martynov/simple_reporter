@@ -1,0 +1,60 @@
+[main]
+log_file = simple_reporter.log
+brief_section_enabled = yes
+
+
+
+[email-reporter]
+enabled = True
+type = reporter-email
+smtp_server = smtp.example.com
+smtp_port = 587
+sender = example.com@example.com
+smtp_username = example.com@example.com
+smtp_password = 123securepasswdhere123
+use_tls = True
+use_auth = True
+to = example.com@example.com
+email_subject = simple_reporter at {{ hostname }}
+
+
+[file-reporter]
+enabled = False
+type = reporter-file
+filename = report.txt
+
+
+[zfs-info]
+type = zfs_info
+enabled = True
+
+[df-test]
+type = df-trivial
+enabled = True
+
+[ifconfig-test]
+type = ifconfig
+enabled = True
+
+[uptime-test]
+type = uptime
+enabled = True
+
+[dmesg-test]
+type = dmesg
+enabled = True
+last_lines = 10
+
+
+
+
+[df-test2]
+type = df
+enabled = True
+
+
+[smartctl-test]
+type = smartctl
+enabled = True
+
+

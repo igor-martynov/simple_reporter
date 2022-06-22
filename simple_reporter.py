@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2022-05-11
+# 2022-06-22
 
-__version__ = "0.5.3"
+__version__ = "0.5.4"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 

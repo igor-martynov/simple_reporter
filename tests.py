@@ -145,6 +145,7 @@ class BaseCMDTest(BaseTest):
 	
 	
 	def run_cmd(self):
+		self._logger.debug(f"run_cmd: will run command {self.CMD_TO_RUN}")
 		try:
 			self.raw_cmd_result = run_command(self.CMD_TO_RUN)
 			self._logger.debug(f"run: got cmd_result: {self.raw_cmd_result}")
@@ -379,6 +380,11 @@ class PingTest(BaseCMDTest):
 		return f"Ping: {self.raw_cmd_result}"
 	
 	
-	# def run(self):
-		
-	# 	pass
+	def run(self):
+		self.init_from_conf_dict()
+		self.pre_run()
+		self.raw_cmd_result = self.run_cmd()
+		self.parse()
+		self.post_run()
+
+		pass

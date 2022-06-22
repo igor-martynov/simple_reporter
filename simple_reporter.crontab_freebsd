@@ -1,0 +1,5 @@
+# reboot
+@reboot		root		sleep 60 && cd /home/phoenix/scripts/simple_reporter && /usr/local/bin/python3.7 ./simple_reporter.py
+
+00 12 * * *	root		cd /home/phoenix/scripts/simple_reporter && /usr/local/bin/python3.7 ./simple_reporter.py
+
