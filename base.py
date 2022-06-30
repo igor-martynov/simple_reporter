@@ -53,7 +53,7 @@ def run_command(cmdstring):
 
 
 def detect_OS():
-	"""Ansible-like detect OS type, distribution and version, and return dict"""
+	"""Ansible-like detection of OS type, distribution and version, will return dict"""
 	result_dict = {"os_family": None, "distribution": None, "major_version": None, "minor_version": None, "release": None}
 	# os_family
 	if os.path.isfile("/etc/redhat-release"):
@@ -79,7 +79,6 @@ class send_mail3(object):
 		utf-8
 		
 	"""
-	# TODO: русские буквы работают, аттачменты работают
 	
 	def __init__(self, sender = "", to = [], subject = "", message = "", logger = None):
 		super(send_mail3, self).__init__()
@@ -91,7 +90,7 @@ class send_mail3(object):
 		self.smtp_passwd = "" # 
 		self.SMTP_SERVER = "" # 
 		self.SMTP_PORT = 25 # 
-		self.USE_AUTH = False # использовать авторизацию
+		self.USE_AUTH = False # True if auth required
 		self.USE_TLS = False # 
 		
 		self.recipient_list = to # лист со строками email-ов получателей
@@ -102,7 +101,7 @@ class send_mail3(object):
 		
 		self.attachment_files = [] # список путей к аттачментам
 		
-		self.DEBUG = False # дебаг
+		self.DEBUG = False # True if use debug
 		self.VERBOSE = False # расширенные сообщения
 		
 		self._composed = False

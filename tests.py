@@ -335,7 +335,6 @@ class SmartctlTest(BaseCMDTest):
 				self.raw_cmd_result_list.append(res)
 			except Exception as e:
 				self._logger.error(f"run_cmd: was running command for disk {d}, got error {e}, traceback is: {traceback.format_exc()}")
-		pass
 		
 		
 	def parse(self):
@@ -359,10 +358,10 @@ class PingTest(BaseCMDTest):
 	"""PingTest"""
 	def __init__(self, config = None, logger = None, conf_dict = None):
 		super(PingTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "uptime"
-		self.descr = "uptime test"
+		self.name = "ping"
+		self.descr = "ping test"
 		self.CMD_TO_RUN = "ping"
-		self._TYPE = "uptime"
+		self._TYPE = "ping"
 		self.host = ""
 		self.count = 4
 		
@@ -388,3 +387,31 @@ class PingTest(BaseCMDTest):
 		self.post_run()
 
 		pass
+
+
+
+class TracerouteTest(BaseCMDTest):
+	"""docstring for TracerouteTest"""
+	def __init__(self, config = None, logger = None, conf_dict = None):
+		super(TracerouteTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
+		self.name = "traceroute"
+		self.descr = "traceroute test"
+		self.CMD_TO_RUN = "traceroute"
+		self._TYPE = "traceroute"
+		self.host = ""
+		pass
+	
+	
+	def init_from_conf_dict(self):
+		self.host = self._conf_dict["host"]
+		self.CMD_TO_RUN = f"traceroute {self.host}"
+		pass
+	
+	
+	# unsupported
+	# @property
+	# def report_brief(self):
+	# 	return f"traceroute: {self.raw_cmd_result}"
+	
+		
+

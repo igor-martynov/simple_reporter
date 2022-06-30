@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2022-06-22
+# 2022-06-30
 
-__version__ = "0.5.4"
+__version__ = "0.5.5"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
 
-"""
+"""Simple Reporter. Send simple reports via email.
 """
 
 
@@ -61,12 +61,13 @@ class TestLoader(object):
 		self.tests_table = {}
 		self.tests_table["df"] = DFTest
 		self.tests_table["ifconfig"] = IfconfigTest
-		# self.tests_table[""] = 
 		self.tests_table["uptime"] = UptimeTest
 		self.tests_table["dmesg"] = DmesgTest
 		self.tests_table["zfs_info"] = ZFSInfoTest
 		self.tests_table["smartctl"] = SmartctlTest
 		self.tests_table["ping"] = PingTest
+		self.tests_table["traceroute"] = TracerouteTest
+		# self.tests_table[""] = 
 		
 		self._logger.debug(f"init_tests_table: inited with {len(self.tests_table.keys())} test types")
 		pass
