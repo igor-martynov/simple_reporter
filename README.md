@@ -2,12 +2,15 @@
 Simple Reporter.
 
 
-Send simple status reports via email. 
+Send simple server status reports via email. 
+
+
 This utility is supposed to be run from crontab, or some sort of script.
 
 
 
 Supported tests: 
+df-trivial - disk free trivial test
 df - disk free
 uptime - regular uptime
 ifconfig - status of network interfaces

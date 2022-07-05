@@ -42,6 +42,7 @@ class BaseTest(object):
 		self.error = None
 		self.running = None
 		self.complete = None
+		self.failed = None
 		self.date_start = None
 		self.date_end = None
 		
@@ -167,9 +168,9 @@ class DFTrivialTest(BaseCMDTest):
 	"""trivial df test, will use df utility and simply report df output"""
 	
 	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(DFTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "df"
-		self.descr = "disk free test"
+		super(DFTrivialTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
+		self.name = "df-trivial"
+		self.descr = "disk free test (trivial)"
 		self.CMD_TO_RUN = "df"
 		self._TYPE = "df-trivial"
 
@@ -222,8 +223,10 @@ class IfconfigTest(BaseCMDTest):
 		dev = "N/A"
 		ip = "N/A"
 		for l in splitted_cmd_list:
+			if not " flags=" in l and not "inet" in l:
+				continue
 			if " flags=" in l:
-				dev = l.split(" ")[0]
+				dev = (l.split(" ")[0])[0:-1]
 			if "127.0.0.1" not in l and "inet " in l:
 				ip = l.replace("inet ", "").split( )[0]
 				self.discovered_IPs.append(ip)
@@ -231,6 +234,15 @@ class IfconfigTest(BaseCMDTest):
 					self.discovered_IPs_dict[dev] = ip
 				else:
 					self.discovered_IPs_dict[dev] += ", " + ip
+			
+		if dev == "N/A" or dev == "":
+			self.failed = True
+			self.error_text += "Could not detect device name"
+			self._logger.info("parse: set failed = True because could not detect device name")
+		if ip == "N/A" or ip == "":
+			self.failed = True
+			self.error_text += "Could not detect IP"
+			self._logger.info("parse: set failed = True because could not detect IP")			
 		self._report = self.raw_cmd_result
 		self._logger.debug(f"parse: discovered_IPs: {self.discovered_IPs}, discovered_IPs_dict: {self.discovered_IPs_dict}")
 	
@@ -238,8 +250,8 @@ class IfconfigTest(BaseCMDTest):
 	@property
 	def report_brief(self):
 		_report_brief = ""
-		for ip in self.discovered_IPs:
-			_report_brief += f"IP: {ip}" + "\n"
+		for dev, ip in self.discovered_IPs_dict.items():
+			_report_brief += f"IP {dev}: {ip}" + "\n"
 		return _report_brief
 	
 
@@ -353,9 +365,14 @@ class SmartctlTest(BaseCMDTest):
 
 
 
-
 class PingTest(BaseCMDTest):
-	"""PingTest"""
+	"""PingTest
+	
+	possible errors:
+	From 10.70.255.252 icmp_seq=1 Destination Host Unreachable
+	ping: ya1123132123.ru: Name or service not known
+	
+	"""
 	def __init__(self, config = None, logger = None, conf_dict = None):
 		super(PingTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
 		self.name = "ping"
@@ -385,7 +402,6 @@ class PingTest(BaseCMDTest):
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
 		self.post_run()
-
 		pass
 
 
@@ -407,6 +423,15 @@ class TracerouteTest(BaseCMDTest):
 		self.CMD_TO_RUN = f"traceroute {self.host}"
 		pass
 	
+	
+	def run(self):
+		self.init_from_conf_dict()
+		self.pre_run()
+		self.raw_cmd_result = self.run_cmd()
+		self.parse()
+		self.post_run()
+
+		pass
 	
 	# unsupported
 	# @property
