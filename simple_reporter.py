@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2022-07-05
+# 2022-07-27
 
-__version__ = "0.5.6"
+__version__ = "0.5.8"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -68,6 +68,7 @@ class TestLoader(object):
 		self.tests_table["ping"] = PingTest
 		self.tests_table["traceroute"] = TracerouteTest
 		self.tests_table["df-trivial"] = DFTrivialTest
+		self.tests_table["downtime"] = DowntimeTest
 		# self.tests_table[""] = 
 		
 		self._logger.debug(f"init_tests_table: inited with {len(self.tests_table.keys())} test types")
@@ -86,7 +87,6 @@ class TestLoader(object):
 		else:
 			self._logger.error(f"parse_config_section: could not find type {_type} in tests_table")
 			return
-		pass
 	
 	
 	def create_test(self, _type, section):
@@ -94,8 +94,6 @@ class TestLoader(object):
 		cls = self.tests_table[_type]
 		new_test = cls(logger = self._logger.getChild(self._config.get(section, "type") + "_" + section), config = self._config, conf_dict = self._config[section])
 		self.add_test(new_test)
-		
-		pass
 	
 	
 	def load_all(self):
@@ -106,20 +104,18 @@ class TestLoader(object):
 				continue
 			self.parse_config_section(section)
 		self._logger.info("load_all: complete")
-		pass
 		
 
 
 class SimpleReporter(object):
-	"""docstring for SimpleReporter"""
+	""""""
 	
-	def __init__(self):
+	def __init__(self, log_file = "./simple_reporter.log", config_file = "./simple_reporter.conf"):
 		super(SimpleReporter, self).__init__()
 		
-		self.LOG_FILE = "./simple_reporter.log"
-		self.CONFIG_FILE = "./simple_reporter.conf"
+		self.LOG_FILE = log_file
+		self.CONFIG_FILE = config_file
 		self._config = configparser.ConfigParser()
-		# self._config.read(self.CONFIG_FILE)
 		
 		self._logger = None
 		
@@ -127,6 +123,9 @@ class SimpleReporter(object):
 		self.tests = []
 		self.reporters = []
 		self._test_loader = None
+		
+		# 
+		self.heartbeat_file = "/var/tmp/heartbeat"
 		
 		self.TEMPLATE_FILE = "main.jinja2"
 		self._template = None
@@ -154,9 +153,7 @@ class SimpleReporter(object):
 		formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 		fh.setFormatter(formatter)
 		self._logger.addHandler(fh)
-		
 		self._logger.debug("======== simple_reporter starting, version " + __version__ + " ========")
-		pass
 	
 	
 	def _load_config_section_main(self):
@@ -167,7 +164,7 @@ class SimpleReporter(object):
 		else:
 			self.LOG_FILE = self._config.get("main", "log_file")
 			print(f"Using absolute path to log file: {self.LOG_FILE}")
-		if self._config.get("main", "brief_section_enabled") == "yes":
+		if self._config.has_option("main", "brief_section_enabled") and self._config.get("main", "brief_section_enabled") == "yes":
 			pass
 		self.init_logger()
 	
@@ -191,11 +188,9 @@ class SimpleReporter(object):
 	
 	def load_config(self):
 		self._config.read(self.CONFIG_FILE)
-		
 		self._load_config_section_main()
 		self._load_config_section_other()
-		self._logger.debug("load_config: complete")
-		pass
+		self._logger.debug(f"load_config: complete, file {self.CONFIG_FILE} loaded")
 	
 	
 	def init_test_loader(self):
@@ -205,11 +200,9 @@ class SimpleReporter(object):
 	def init_tests(self):
 		self._logger.debug("init_tests: starting")
 		self.tests = []
-		
 		self._test_loader.load_all()
 		self.tests = self._test_loader.tests
 		self._logger.info(f"init_tests: complete, inited {len(self.tests)} tests")
-		pass
 	
 	
 	def init_template(self):
@@ -223,9 +216,8 @@ class SimpleReporter(object):
 			try:
 				t.run()
 			except Exception as e:
-				self._logger.error(f"run_tests: got error while running {t}: {e}, traceback: {traceback.format_exc()}")
+				self._logger.error(f"run_tests: got error while running test {t}: {e}, traceback: {traceback.format_exc()}")
 		self._logger.info("run_tests: complete")
-		pass
 	
 	
 	def compile_report(self):
@@ -235,8 +227,7 @@ class SimpleReporter(object):
 			datetime = datetime.datetime.now(),
 			tests = self.tests,
 			os_type = os_type_dict["os_family"])
-		self._logger.debug(f"compile_report: report is: {self.report_text}")
-		pass
+		self._logger.debug("compile_report: complete")
 	
 	
 	def add_test(self, test_obj):
@@ -248,14 +239,41 @@ class SimpleReporter(object):
 		self._logger.info(f"send_report: starting, will be used reporters: {self.reporters} ({len(self.reporters)} total)")
 		for reporter in self.reporters:
 			reporter.send_report(self.report_text)
-			print(f"D sending report with reporter {reporter}")
-			pass
 		self._logger.debug("send_report: complete")
-
-
+	
+	
+	def save_heartbeat(self):
+		"""save heartbeat to file"""
+		heartbeat_test = None
+		for t in self.tests:
+			if t.TYPE == "downtime":
+				heartbeat_test = t
+		if heartbeat_test is not None:
+			save_heartbeat(heartbeat_test.heartbeat_file)
+			self._logger.info(f"save_heartbeat: saved to file {heartbeat_test.heartbeat_file}")
+		else:
+			self._logger.error("save_heartbeat: to configured heartbeat test found in config, will not save heartbeat.")
 
 
 if __name__ == "__main__":
+	
+	# cmdline args
+	arguments = sys.argv[1:]
+	if "--collect-only" in arguments:
+		COLLECT_ONLY = True
+	else:
+		COLLECT_ONLY = False
+	if "--save-heartbeat" in arguments:
+		print("Saving heartbeat only...")
+		sr = SimpleReporter()
+		sr.load_config()
+		sr.init_template()
+		sr.init_test_loader()
+		sr.init_tests()
+		sr.save_heartbeat()
+		sys.exit(0)
+	
+	
 	sr = SimpleReporter()
 	sr.load_config()
 	# sr.init_tests()
@@ -263,8 +281,10 @@ if __name__ == "__main__":
 	sr.init_test_loader()
 	sr.init_tests()
 	sr.run_tests()
-	sr.compile_report()
-	sr.send_report()
+	if not COLLECT_ONLY:
+		sr.compile_report()
+		sr.send_report()
+	
 	pass
 
 

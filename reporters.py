@@ -53,7 +53,8 @@ class BaseReporter(object):
 	
 
 class EmailReporter(send_mail3, BaseReporter):
-	"""docstring for EmailReporter - this is wrapper class for send_mail3. It can send reports via email"""
+	"""Send report via email.
+	This is wrapper class for send_mail3."""
 	
 	def __init__(self, config = None, logger = None, sender = "", to = [], subject = "", message = ""):
 		# super(EmailReporter, self).__init__(logger = logger, config = config, sender = sender, to = to, subject = subject, message = message)

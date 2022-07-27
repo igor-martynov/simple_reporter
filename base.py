@@ -69,7 +69,97 @@ def detect_OS():
 		with open("/etc/debian_version", "r") as f:
 			content = f.read()
 			result_dict["major_version"], result_dict["minor_version"] = content.replace("\n", "").split(".")
+	if result_dict["os_family"] == "FreeBSD":
+		try:
+			tmp = run_command("freebsd-version")
+			result_dict["major_version"], result_dict["minor_version"] = tmp.split("-")[0].split(".")
+		except Exception as e:
+			pass
 	return result_dict
+
+
+# TODO: tested in Linux, should be tested more
+def parse_uptime(uptime_str):
+	uptime_timedelta = None
+	days = 0
+	hours = 0
+	minutes = 0
+	
+	try:
+		# stage1 - get substring
+		substr1 = uptime_str.split(" up ")[1]
+		substr2 = substr1.split(" user")[0]
+		sublist3 = substr2.split(", ")
+		substr = ", ".join(sublist3[:-1])
+		
+		# stage2 - parse substring into ints
+		if "day" in substr: # if uptime is more than 1 day
+			days = int(substr.split(" day")[0])
+			substr_no_day = substr.split("days, ")[1] if "days, " in substr else substr.split("day, ")[1]
+			if substr_no_day.startswith(" "):
+				substr_no_day = substr_no_day[1:]
+		else:
+			substr_no_day = substr		
+		if "min" in substr: # if uptime is counted in minutes (0..59 min)
+			minutes = int(substr.split(" min")[0])
+		else:
+			hours = int(substr_no_day.split(":")[0])
+			minutes = int(substr_no_day.split(":")[1])
+		
+	except Exception as e:
+		print(f"parse_uptime: got exception {e}, traceback: {traceback.format_exc()}")
+	return datetime.timedelta(days = days, hours = hours, minutes = minutes)
+
+
+def get_uptime():
+	uptime_cmd_result = run_command("uptime")
+	return parse_uptime(uptime_cmd_result)
+
+
+def save_heartbeat(heartbeat_file):
+	with open(heartbeat_file, "w") as f:
+		datetime_now_str = datetime.datetime.now().isoformat()
+		f.write(datetime_now_str)
+		print(f"D: saved heartbeat to file {heartbeat_file}")
+		return True
+	return False
+
+
+def read_heartbeat(heartbeat_file):
+	with open(heartbeat_file, "r") as f:
+		content = f.read()
+		heartbeat_datetime = datetime.datetime.fromisoformat(content)
+		return heartbeat_datetime
+
+
+def humanify_seconds(iseconds):
+	day_max_s = 24 * 3600
+	hour_max_s = 3600
+	week_max_s = day_max_s * 7
+	weeks = 0
+	days = 0
+	hours = 0
+	minutes = 0
+	seconds = 0
+	
+	weeks = int(iseconds // week_max_s)
+	remain = iseconds - weeks * week_max_s
+	days = int(remain // day_max_s)
+	remain = remain - days * day_max_s
+	hours = int(remain // hour_max_s)
+	remain = remain - hours * hour_max_s
+	minutes = int(remain // 60)
+	remain = remain - minutes * 60
+	seconds = int(remain)
+	
+	if weeks != 0:
+		result = f"{weeks} weeks, {days} days, {hours:01d}:{minutes:01d}:{seconds:01d}"
+	elif days != 0:
+		result = f"{days} days, {hours:01d}:{minutes:01d}:{seconds:01d}"
+	else:
+		result = f"{hours:01d}:{minutes:01d}:{seconds:01d}"
+	return result
+
 
 
 class send_mail3(object):

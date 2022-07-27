@@ -27,14 +27,14 @@ Each test checks something, and generates report
 
 
 class BaseTest(object):
-	"""docstring for BaseTest"""
+	"""Base class for tests"""
 	
 	def __init__(self, config = None, logger = None, conf_dict = None):
 		super(BaseTest, self).__init__()
 		
 		self._config = config
 		self._conf_dict = conf_dict
-		self._TYPE = "test"
+		self.TYPE = "test"
 		
 		self.name = "BaseTest"
 		self.descr = "BaseTest descr"
@@ -47,6 +47,7 @@ class BaseTest(object):
 		self.date_end = None
 		
 		self._report = ""
+		self._report_brief = ""
 		self.error_text = ""
 		self.ignored = False
 		
@@ -67,7 +68,6 @@ class BaseTest(object):
 	
 	
 	def init_from_conf_dict(self):
-		
 		pass
 	
 	
@@ -79,7 +79,7 @@ class BaseTest(object):
 	
 	@property
 	def report_brief(self):	
-		return ""
+		return self._report_brief
 	
 	
 	@property
@@ -90,6 +90,11 @@ class BaseTest(object):
 	
 	
 	def run(self):
+		raise NotImplemented
+	
+	
+	def collect(self):
+		"""Collect required data"""
 		raise NotImplemented
 	
 	
@@ -120,7 +125,7 @@ class BaseCMDTest(BaseTest):
 		self.name = "base_cmd_test"
 		self.descr = "base cmd test"
 		self.CMD_TO_RUN = "df"
-		self._TYPE = "base"
+		self.TYPE = "base"
 		self.raw_cmd_result = ""
 		
 		self._os_type_dict = detect_OS()
@@ -149,7 +154,7 @@ class BaseCMDTest(BaseTest):
 		self._logger.debug(f"run_cmd: will run command {self.CMD_TO_RUN}")
 		try:
 			self.raw_cmd_result = run_command(self.CMD_TO_RUN)
-			self._logger.debug(f"run: got cmd_result: {self.raw_cmd_result}")
+			# self._logger.debug(f"run: got cmd_result: {self.raw_cmd_result}")
 		except Exception as e:
 			self._logger.error(f"run_cmd: got error {e}, traceback: {traceback.format_exc()}")
 			self.error_text += str(e)
@@ -172,19 +177,20 @@ class DFTrivialTest(BaseCMDTest):
 		self.name = "df-trivial"
 		self.descr = "disk free test (trivial)"
 		self.CMD_TO_RUN = "df"
-		self._TYPE = "df-trivial"
+		self.TYPE = "df-trivial"
 
 
 
+# TODO: will be modernized
 class DFTest(BaseCMDTest):
-	"""df test, will use df utility"""
+	"""extended df test, will use df utility"""
 	
 	def __init__(self, config = None, logger = None, conf_dict = None):
 		super(DFTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
 		self.name = "df"
 		self.descr = "disk free test"
 		self.CMD_TO_RUN = "df"
-		self._TYPE = "df"
+		self.TYPE = "df"
 
 
 
@@ -195,7 +201,7 @@ class UptimeTest(BaseCMDTest):
 		self.name = "uptime"
 		self.descr = "uptime test"
 		self.CMD_TO_RUN = "uptime"
-		self._TYPE = "uptime"
+		self.TYPE = "uptime"
 	
 	
 	@property
@@ -211,7 +217,7 @@ class IfconfigTest(BaseCMDTest):
 		self.name = "ifconfig"
 		self.descr = "ifconfig test"
 		self.CMD_TO_RUN = "ifconfig -a"
-		self._TYPE = "ifconfig"
+		self.TYPE = "ifconfig"
 		
 		self.discovered_IPs = []
 		self.discovered_IPs_dict = {}
@@ -265,7 +271,7 @@ class DmesgTest(BaseCMDTest):
 		self.descr = "last lines of dmesg output"
 		self.num_lines = 20
 		self.CMD_TO_RUN = f"dmesg"
-		self._TYPE = "dmesg"
+		self.TYPE = "dmesg"
 		self.init_from_conf_dict()
 	
 	
@@ -293,7 +299,7 @@ class ZFSInfoTest(BaseCMDTest):
 		self.name = "zfs"
 		self.descr = "zpool status"
 		self.CMD_TO_RUN = "zpool status"
-		self._TYPE = "zfs_info"
+		self.TYPE = "zfs_info"
 		
 	
 	def run(self):
@@ -315,7 +321,7 @@ class SmartctlTest(BaseCMDTest):
 		self.name = "smartctl"
 		self.descr = "SMART info"
 		self.CMD_TO_RUN = "smartctl -a "
-		self._TYPE = "smartctl"
+		self.TYPE = "smartctl"
 		self.detected_disks = []
 		self.raw_cmd_result_list = []
 	
@@ -325,16 +331,17 @@ class SmartctlTest(BaseCMDTest):
 		self.detected_disks = []
 		if detected_os_dict["os_family"] == "FreeBSD":
 			disk_tmp_list = glob.glob("/dev/da*")
+			self._logger.debug(f"_detect_disks: got glob result: {disk_tmp_list}")
 			for d in disk_tmp_list:
 				if "p" not in d:
 					self.detected_disks.append(d)
 		elif detected_os_dict["os_family"] == "RedHat" or detected_os_dict["os_family"] == "Debian" or detected_os_dict["os_family"] == "SuSE":
 			disk_tmp_list = glob.glob("/dev/sd*") + glob.glob("/dev/vd*")
+			self._logger.debug(f"_detect_disks: got glob result: {disk_tmp_list}")
 			for d in disk_tmp_list:
 				if not d[-1].isnumeric():
 					self.detected_disks.append(d)
-		self._logger.debug(f"disk_tmp_list was: {disk_tmp_list}")
-		self._logger.info(f"detected disks: {self.detected_disks}.")
+		self._logger.info(f"_detect_disks: detected disks: {self.detected_disks}.")
 		return self.detected_disks
 	
 	
@@ -378,7 +385,7 @@ class PingTest(BaseCMDTest):
 		self.name = "ping"
 		self.descr = "ping test"
 		self.CMD_TO_RUN = "ping"
-		self._TYPE = "ping"
+		self.TYPE = "ping"
 		self.host = ""
 		self.count = 4
 		
@@ -413,7 +420,7 @@ class TracerouteTest(BaseCMDTest):
 		self.name = "traceroute"
 		self.descr = "traceroute test"
 		self.CMD_TO_RUN = "traceroute"
-		self._TYPE = "traceroute"
+		self.TYPE = "traceroute"
 		self.host = ""
 		pass
 	
@@ -433,10 +440,54 @@ class TracerouteTest(BaseCMDTest):
 
 		pass
 	
-	# unsupported
-	# @property
-	# def report_brief(self):
-	# 	return f"traceroute: {self.raw_cmd_result}"
 	
-		
 
+# TODO: under construction
+class DowntimeTest(BaseTest):
+	"""report last downtime"""
+	def __init__(self, config = None, logger = None, conf_dict = None):
+		super(DowntimeTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
+		self.name = "downtime"
+		self.TYPE = "downtime"
+		self.descr = "downtime test"
+		self.heartbeat_file = conf_dict["heartbeat_file"]
+		self.period_s = int(conf_dict["heartbeat_period_s"])
+		self.last_heartbeat = None
+		self.boot_time = None
+		self.downtime_start = None
+		self.downtime_end = None
+		self.downtime_s = None
+		pass
+		
+	
+	
+	def run(self):
+		self.last_heartbeat = read_heartbeat(self.heartbeat_file)
+		self.compile_report()
+	
+
+	def compile_report(self):
+		self._logger.debug("compile_report: starting")
+		now = datetime.datetime.now()
+		uptime_timedelta = get_uptime()
+		self.boot_time = now - uptime_timedelta
+		self._logger.debug(f"compile_report: boot_time detected as {self.boot_time}")
+		self.downtime_start = None
+		self.downtime_end = None
+		
+		if self.last_heartbeat + datetime.timedelta(seconds = self.period_s) < now and self.last_heartbeat < self.boot_time:
+			# no heartbeat for more than self.period_s seconds
+			self.downtime_start = self.last_heartbeat
+			self.downtime_end = self.boot_time
+			self.downtime_s = (self.downtime_end - self.downtime_start).total_seconds()
+			self._report_brief = f"Downtime: {self.downtime_s}s ({humanify_seconds(self.downtime_s)}), from {self.downtime_start} till {self.downtime_end} "
+			self._report = self._report_brief
+		elif self.last_heartbeat + datetime.timedelta(seconds = self.period_s) >= now:
+			self._report_brief = "Downtime: no downtime detected"
+			self._report = self._report_brief
+			pass
+		else:
+			self._report_brief = f"Downtime: no downtime detected, but last heartbeat was too long ago... ({humanify_seconds((datetime.datetime.now() - self.last_heartbeat).total_seconds())} since last heartbeat)"
+			self._report = self._report_brief
+		self._logger.debug("compile_report: complete")
+		
