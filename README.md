@@ -3,7 +3,7 @@ Simple Reporter - send simple server status reports via email.
 
 
 This utility is supposed to be run from crontab, or some sort of script.
-
+This utility is not intended as a monotoring, though it can monitor results of some tests (see test code). 
 
 
 Supported tests: 

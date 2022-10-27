@@ -35,12 +35,11 @@ class BaseTest(object):
 		self.TYPE = "test"
 		
 		self.name = "BaseTest"
-		self.descr = "BaseTest descr"
+		self.descr = "BaseTest description"
 		
-		self.error = None
 		self.running = None
 		self.complete = None
-		self.failed = None
+		self.failed = None # result is faulty 
 		self.date_start = None
 		self.date_end = None
 		
@@ -57,22 +56,19 @@ class BaseTest(object):
 		pass
 	
 	
+	@property
+	def execution_failed(self):
+		return True if len(self.error_text) == 0 else False 
+	
+	
 	def init_template(self):
-		# env = Environment(loader = PackageLoader("simple_reporter"), autoescape = select_autoescape())
 		env = Environment(loader = FileSystemLoader([os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates"),]), autoescape = select_autoescape())
 		self._template = env.get_template(self.TEMPLATE_FILE)
 		self._logger.debug(f"init_template: loaded tempalte: {self._template}")
-		pass
 	
 	
 	def init_from_conf_dict(self):
 		pass
-	
-	
-	# @property
-	# def report(self):
-	# 	templ = Template("Test: {{ name}} ({{ descr }})\n\n {{ report }}\n\n\n")
-	# 	return templ.render(name = self.name, descr = self.descr, report = self._report)
 	
 	
 	@property

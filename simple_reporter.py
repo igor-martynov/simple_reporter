@@ -18,7 +18,6 @@ import os.path
 import os
 import datetime
 import time
-# import glob
 import configparser
 import socket
 
