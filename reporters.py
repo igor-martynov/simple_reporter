@@ -96,9 +96,6 @@ class EmailReporter(send_mail3, BaseReporter):
 				except Exception as e:
 					self._logger.error(f"load_config: got error while parsing section, error: {e}, traceback: {traceback.format_exc()}")
 				break
-			pass
-		
-		pass
 	
 	
 	def send_report(self, report):

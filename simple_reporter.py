@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2022-07-27
+# 2022-10-27
 
-__version__ = "0.5.8"
+__version__ = "0.5.9"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -63,7 +63,8 @@ class TestLoader(object):
 		self.tests_table["ifconfig"] = IfconfigTest
 		self.tests_table["uptime"] = UptimeTest
 		self.tests_table["dmesg"] = DmesgTest
-		self.tests_table["zfs_info"] = ZFSInfoTest
+		self.tests_table["zfs_zpool_status"] = ZFSZPoolStatusTest
+		self.tests_table["zfs_zpool_list"] = ZFSZPoolListTest
 		self.tests_table["smartctl"] = SmartctlTest
 		self.tests_table["ping"] = PingTest
 		self.tests_table["traceroute"] = TracerouteTest
@@ -116,7 +117,6 @@ class SimpleReporter(object):
 		self.LOG_FILE = log_file
 		self.CONFIG_FILE = config_file
 		self._config = configparser.ConfigParser()
-		
 		self._logger = None
 		
 		# 
@@ -174,7 +174,6 @@ class SimpleReporter(object):
 		for section in sections:
 			if section == "main": # this section should be already persed above
 				continue
-
 			# reporter-email
 			if self._config.get(section, "type") == "reporter-email" and self._config.get(section, "enabled") == "True":
 				# conf_dict = self._config[section]
@@ -253,6 +252,7 @@ class SimpleReporter(object):
 			self._logger.info(f"save_heartbeat: saved to file {heartbeat_test.heartbeat_file}")
 		else:
 			self._logger.error("save_heartbeat: to configured heartbeat test found in config, will not save heartbeat.")
+
 
 
 if __name__ == "__main__":

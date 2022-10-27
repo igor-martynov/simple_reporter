@@ -2,6 +2,7 @@
 log_file = simple_reporter.log
 brief_section_enabled = yes
 
+# send report via email
 [email-reporter]
 enabled = True
 type = reporter-email
@@ -15,6 +16,7 @@ use_auth = True
 to = example.com@example.com
 email_subject = simple_reporter at {{ hostname }}
 
+# save report to file
 [file-reporter]
 enabled = False
 type = reporter-file
@@ -24,9 +26,12 @@ filename = report.txt
 
 
 # tests
+[zfs-zpool-status]
+type = zfs_zpool_status
+enabled = True
 
-[zfs-info]
-type = zfs_info
+[zfs-zpool-list]
+type = zfs_zpool_list
 enabled = True
 
 [df-test]
@@ -54,3 +59,9 @@ enabled = True
 type = traceroute
 enabled = True
 host = 8.8.8.8
+
+[downtime-test]
+type = downtime
+enabled = True
+heartbeat_period_s = 600
+heartbeat_file = /var/tmp/heartbeat

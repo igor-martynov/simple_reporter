@@ -64,7 +64,7 @@ def detect_OS():
 		result_dict["os_family"] = "Debian"
 	if os.path.isfile("/bin/freebsd-version"):
 		result_dict["os_family"] = "FreeBSD"
-	# versions
+	# version
 	if result_dict["os_family"] == "Debian":
 		with open("/etc/debian_version", "r") as f:
 			content = f.read()

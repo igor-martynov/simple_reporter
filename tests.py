@@ -20,8 +20,6 @@ from base import *
 
 Each test checks something, and generates report
 
-
-
 """
 
 
@@ -115,7 +113,6 @@ class BaseCMDTest(BaseTest):
 	"""Base Test which use shell command
 	
 	This is also an example of class usage
-	
 	
 	"""
 	
@@ -292,14 +289,35 @@ class DmesgTest(BaseCMDTest):
 
 
 
-class ZFSInfoTest(BaseCMDTest):
-	"""docstring for ZFSInfoTest"""
+class ZFSZPoolStatusTest(BaseCMDTest):
+	"""docstring for ZFSZPoolStatusTest"""
 	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(ZFSInfoTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
+		super(ZFSZPoolStatusTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
 		self.name = "zfs"
 		self.descr = "zpool status"
 		self.CMD_TO_RUN = "zpool status"
-		self.TYPE = "zfs_info"
+		self.TYPE = "zfs_zpool_status"
+		
+	
+	def run(self):
+		if self._os_type_dict["os_family"] != "FreeBSD":
+			self._logger.info(f"run: unsupported OS detected: {self._os_type_dict['os_family']}, returning None")
+			self.ignored = True
+			return
+		self.pre_run()
+		self.raw_cmd_result = self.run_cmd()
+		self.parse()
+		self.post_run()
+
+
+class ZFSZPoolListTest(BaseCMDTest):
+	"""docstring for ZFSZPoolListTest"""
+	def __init__(self, config = None, logger = None, conf_dict = None):
+		super(ZFSZPoolListTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
+		self.name = "zfs"
+		self.descr = "zpool list"
+		self.CMD_TO_RUN = "zpool list"
+		self.TYPE = "zfs_zpool_list"
 		
 	
 	def run(self):
@@ -363,9 +381,7 @@ class SmartctlTest(BaseCMDTest):
 	
 	def run(self):
 		self.pre_run()
-		# detect disks
 		self._detect_disks()
-		
 		self.run_cmd()
 		self.parse()
 		self.post_run()
@@ -410,7 +426,19 @@ class PingTest(BaseCMDTest):
 		self.parse()
 		self.post_run()
 		pass
-
+	
+	
+	# TODO: uneder construction
+	def parse(self):
+		"""should parse these outputs:
+		Name or service not known
+		3 packets transmitted, 3 received, 0% packet loss, time 5ms
+		6 packets transmitted, 0 received, 100% packet loss, time 130ms
+		
+		"""
+		return None
+	
+	
 
 
 class TracerouteTest(BaseCMDTest):
