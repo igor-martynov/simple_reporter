@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2022-10-27
+# 2023-02-01
 
-__version__ = "0.5.9"
+__version__ = "0.6.0"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -69,6 +69,7 @@ class TestLoader(object):
 		self.tests_table["traceroute"] = TracerouteTest
 		self.tests_table["df-trivial"] = DFTrivialTest
 		self.tests_table["downtime"] = DowntimeTest
+		self.tests_table["file_content"] = FileContentTest
 		# self.tests_table[""] = 
 		
 		self._logger.debug(f"init_tests_table: inited with {len(self.tests_table.keys())} test types")

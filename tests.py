@@ -34,7 +34,7 @@ class BaseTest(object):
 		self._conf_dict = conf_dict
 		self.TYPE = "test"
 		
-		self.name = "BaseTest"
+		self.name = "BaseTest" # this should be name of config section
 		self.descr = "BaseTest description"
 		
 		self.running = None
@@ -43,8 +43,8 @@ class BaseTest(object):
 		self.date_start = None
 		self.date_end = None
 		
-		self._report = ""
-		self._report_brief = ""
+		self.result = ""
+		self.result_brief = ""
 		self.error_text = ""
 		self.ignored = False
 		
@@ -73,12 +73,12 @@ class BaseTest(object):
 	
 	@property
 	def report_brief(self):	
-		return self._report_brief
+		return self.result_brief
 	
 	
 	@property
 	def report(self):
-		report = self._template.render(name = self.name, descr = self.descr, report = self._report, error_text = self.error_text)
+		report = self._template.render(name = self.name, descr = self.descr, report = self.result, error_text = self.error_text)
 		self._logger.debug(f"report: will return: {report}")
 		return report
 	
@@ -116,31 +116,26 @@ class BaseCMDTest(BaseTest):
 		super(BaseCMDTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
 		
 		self.name = "base_cmd_test"
-		self.descr = "base cmd test"
+		self.descr = "base command test"
 		self.CMD_TO_RUN = "df"
 		self.TYPE = "base"
 		self.raw_cmd_result = ""
-		
 		self._os_type_dict = detect_OS()
 	
 	
 	def pre_run(self):
 		self._logger.info(f"pre_run: starting, CMD_TO_RUN: {self.CMD_TO_RUN}")
 		self.mark_start()
-		# os_dict = detect_OS()
 		self._logger.debug(f"pre_run: detected os: {self._os_type_dict}")
 		
 	
 	def post_run(self):
-		
 		self.mark_end()
 		self._logger.debug(f"post_run: complete")
 	
 	
 	def parse(self):
-		""""""
-		self._report = self.raw_cmd_result
-		pass
+		self.result = self.raw_cmd_result
 	
 	
 	def run_cmd(self):
@@ -242,16 +237,16 @@ class IfconfigTest(BaseCMDTest):
 			self.failed = True
 			self.error_text += "Could not detect IP"
 			self._logger.info("parse: set failed = True because could not detect IP")			
-		self._report = self.raw_cmd_result
+		self.result = self.raw_cmd_result
 		self._logger.debug(f"parse: discovered_IPs: {self.discovered_IPs}, discovered_IPs_dict: {self.discovered_IPs_dict}")
 	
 		
 	@property
 	def report_brief(self):
-		_report_brief = ""
+		result_brief = ""
 		for dev, ip in self.discovered_IPs_dict.items():
-			_report_brief += f"IP {dev}: {ip}" + "\n"
-		return _report_brief
+			result_brief += f"IP {dev}: {ip}" + "\n"
+		return result_brief
 	
 
 
@@ -269,10 +264,10 @@ class DmesgTest(BaseCMDTest):
 	
 	
 	def parse(self):
-		self._report = ""
+		self.result = ""
 		try:
 			for l in self.raw_cmd_result.splitlines()[-self.num_lines:]:
-				self._report += l + "\n"
+				self.result += l + "\n"
 		except Exception as e:
 			self._logger.error(f"parse: got except {e}, traceback: {traceback.format_exc()}")
 	
@@ -304,6 +299,7 @@ class ZFSZPoolStatusTest(BaseCMDTest):
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
 		self.post_run()
+
 
 
 class ZFSZPoolListTest(BaseCMDTest):
@@ -372,7 +368,7 @@ class SmartctlTest(BaseCMDTest):
 		
 	def parse(self):
 		for r in self.raw_cmd_result_list:
-			self._report += r + "\n\n"
+			self.result += r + "\n\n"
 	
 	
 	def run(self):
@@ -435,7 +431,6 @@ class PingTest(BaseCMDTest):
 		return None
 	
 	
-
 
 class TracerouteTest(BaseCMDTest):
 	"""docstring for TracerouteTest"""
@@ -504,14 +499,42 @@ class DowntimeTest(BaseTest):
 			self.downtime_start = self.last_heartbeat
 			self.downtime_end = self.boot_time
 			self.downtime_s = (self.downtime_end - self.downtime_start).total_seconds()
-			self._report_brief = f"Downtime: {self.downtime_s}s ({humanify_seconds(self.downtime_s)}), from {self.downtime_start} till {self.downtime_end} "
-			self._report = self._report_brief
+			self.result_brief = f"Downtime: {self.downtime_s}s ({humanify_seconds(self.downtime_s)}), from {self.downtime_start} till {self.downtime_end} "
+			self.result = self.result_brief
 		elif self.last_heartbeat + datetime.timedelta(seconds = self.period_s) >= now:
-			self._report_brief = "Downtime: no downtime detected"
-			self._report = self._report_brief
+			self.result_brief = "Downtime: no downtime detected"
+			self.result = self.result_brief
 			pass
 		else:
-			self._report_brief = f"Downtime: no downtime detected, but last heartbeat was too long ago... ({humanify_seconds((datetime.datetime.now() - self.last_heartbeat).total_seconds())} since last heartbeat)"
-			self._report = self._report_brief
+			self.result_brief = f"Downtime: no downtime detected, but last heartbeat was too long ago... ({humanify_seconds((datetime.datetime.now() - self.last_heartbeat).total_seconds())} since last heartbeat)"
+			self.result = self.result_brief
 		self._logger.debug("compile_report: complete")
+
+
+
+class FileContentTest(BaseTest):
+	"""docstring for FileContentTest"""
+	def __init__(self, config = None, logger = None, conf_dict = None):
+		super(FileContentTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
+		self.name = "file_content"
+		self.TYPE = "file_content"
+		self.descr = "Get content of file"
+		self.path = ""
+		self.init_from_conf_dict()
+	
+	
+	def init_from_conf_dict(self):
+		self.path = self._conf_dict["path"]
 		
+	
+	def run(self):
+		self.mark_start()
+		if not os.path.isfile(self.path):
+			self.failed = True
+			self._logger.error(f"run: could not find file {self.path}")
+			return False
+		with open(self.path, "r") as f:
+			self.result = f.read()
+			self._logger.debug(f"length of file: {len(self.result)}")
+		self.mark_end()
+
