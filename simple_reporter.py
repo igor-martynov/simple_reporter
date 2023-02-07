@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-02-01
+# 2023-02-06
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -111,7 +111,9 @@ class TestLoader(object):
 class SimpleReporter(object):
 	""""""
 	
-	def __init__(self, log_file = "./simple_reporter.log", config_file = "./simple_reporter.conf"):
+	def __init__(self,
+		log_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "simple_reporter.log"),
+		config_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "simple_reporter.conf")):
 		super(SimpleReporter, self).__init__()
 		
 		self.LOG_FILE = log_file
