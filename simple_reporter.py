@@ -278,7 +278,6 @@ if __name__ == "__main__":
 	
 	sr = SimpleReporter()
 	sr.load_config()
-	# sr.init_tests()
 	sr.init_template()
 	sr.init_test_loader()
 	sr.init_tests()

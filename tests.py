@@ -525,7 +525,8 @@ class FileContentTest(BaseTest):
 	
 	def init_from_conf_dict(self):
 		self.path = self._conf_dict["path"]
-		
+		self.descr = f"Сontent of file {self.path}"
+	
 	
 	def run(self):
 		self.mark_start()
