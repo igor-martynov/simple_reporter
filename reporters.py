@@ -36,12 +36,14 @@ from base import *
 
 
 class BaseReporter(object):
-	"""docstring for BaseReporter"""
+	"""BaseReporter - as any Reporter, this class is intended to send (or do anything similar) report"""
+	
 	def __init__(self, config = None, logger = None):
 		super(BaseReporter, self).__init__()
 		self._config = config
 		self._logger = logger
 		self.type = "reporter-base"
+	
 	
 	def load_config(self):
 		raise NotImplemented
@@ -54,19 +56,16 @@ class BaseReporter(object):
 
 class EmailReporter(send_mail3, BaseReporter):
 	"""Send report via email.
-	This is wrapper class for send_mail3."""
+	This is wrapper class for send_mail3. Jinja2 is used for subject template.
+	Therefore email_subject in config - is string that is parsed as template"""
 	
 	def __init__(self, config = None, logger = None, sender = "", to = [], subject = "", message = ""):
 		# super(EmailReporter, self).__init__(logger = logger, config = config, sender = sender, to = to, subject = subject, message = message)
 		send_mail3.__init__(self, sender = sender, to = to, subject = subject, message = message, logger = logger)
 		BaseReporter.__init__(self, logger = logger, config = config)
-		# self._config = config
-		# self._logger = logger
-		
 		self.RECIPIENT_DIVIDER = ","
 		self.type = "reporter-email"
 		self.load_config()
-		pass
 	
 	
 	def load_config(self):
@@ -85,12 +84,10 @@ class EmailReporter(send_mail3, BaseReporter):
 					self.smtp_passwd = self._config.get(section, "smtp_password")
 					self.smtp_username = self._config.get(section, "smtp_username")
 					self.recipient_list = self._config.get(section, "to").split(self.RECIPIENT_DIVIDER)
-					# print("D recipient_list: " + str(self._config.get(section, "to").split(self.RECIPIENT_DIVIDER)))
 					self.SMTP_SERVER = self._config.get(section, "smtp_server")
 					self.SMTP_PORT = int(self._config.get(section, "smtp_port"))
 					self.USE_AUTH = True if self._config.get(section, "use_auth") == "True" else False
 					self.USE_TLS = True if self._config.get(section, "use_tls") == "True" else False
-					# self.subject = self._config.get(section, "email_subject")
 					self.subject = Environment(loader = BaseLoader).from_string(self._config.get(section, "email_subject")).render(hostname = socket.getfqdn())
 					self._logger.info("load_config: config load complete, ending section parsing")
 				except Exception as e:

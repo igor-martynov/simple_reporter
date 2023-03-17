@@ -53,7 +53,6 @@ class BaseTest(object):
 		self._logger = logger
 		
 		self.init_template()
-		pass
 	
 	
 	@property
@@ -155,6 +154,19 @@ class BaseCMDTest(BaseTest):
 		self.parse()
 		self.post_run()
 
+
+
+class BaseTestWithHistory(BaseTest):
+	"""docstring for BaseTestWithHistory"""
+	
+	def __init__(self, config = None, logger = None, conf_dict = None):
+		super(BaseTestWithHistory, self).__init__(config = config, logger = logger, conf_dict = conf_dic)
+		self._DB_table = "baseTable"
+		
+		pass
+	
+	
+		
 
 
 class DFTrivialTest(BaseCMDTest):
@@ -441,13 +453,11 @@ class TracerouteTest(BaseCMDTest):
 		self.CMD_TO_RUN = "traceroute"
 		self.TYPE = "traceroute"
 		self.host = ""
-		pass
 	
 	
 	def init_from_conf_dict(self):
 		self.host = self._conf_dict["host"]
 		self.CMD_TO_RUN = f"traceroute {self.host}"
-		pass
 	
 	
 	def run(self):
@@ -456,12 +466,10 @@ class TracerouteTest(BaseCMDTest):
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
 		self.post_run()
-
-		pass
 	
 	
 
-# TODO: under construction
+# TODO: under construction and testing
 class DowntimeTest(BaseTest):
 	"""report last downtime"""
 	def __init__(self, config = None, logger = None, conf_dict = None):
@@ -476,8 +484,6 @@ class DowntimeTest(BaseTest):
 		self.downtime_start = None
 		self.downtime_end = None
 		self.downtime_s = None
-		pass
-		
 	
 	
 	def run(self):
@@ -513,7 +519,8 @@ class DowntimeTest(BaseTest):
 
 
 class FileContentTest(BaseTest):
-	"""docstring for FileContentTest"""
+	"""report content of text file"""
+	
 	def __init__(self, config = None, logger = None, conf_dict = None):
 		super(FileContentTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
 		self.name = "file_content"

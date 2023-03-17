@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-02-06
+# 2023-03-17
 
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
 
-"""Simple Reporter. Send simple reports via email.
+"""Simple Reporter. Send simple reports about system state via email.
 """
 
 
@@ -82,18 +82,20 @@ class TestLoader(object):
 			self._logger.info(f"parse_config_section: section {section} is disabled, ignoring")
 			return
 		_type = self._config.get(section, "type")
+		_name = section
 		if _type in self.tests_table.keys():
-			self.create_test(_type, section)
+			self.create_test(_type, section, _name)
 			self._logger.debug(f"parse_config_section: section {section} parsed, test created")
 		else:
 			self._logger.error(f"parse_config_section: could not find type {_type} in tests_table")
 			return
 	
 	
-	def create_test(self, _type, section):
+	def create_test(self, _type, section, _name):
 		self._logger.debug(f"create_test: will create test for type {_type}, section: {section}")
 		cls = self.tests_table[_type]
 		new_test = cls(logger = self._logger.getChild(self._config.get(section, "type") + "_" + section), config = self._config, conf_dict = self._config[section])
+		new_test.name = _name
 		self.add_test(new_test)
 	
 	
@@ -113,10 +115,12 @@ class SimpleReporter(object):
 	
 	def __init__(self,
 		log_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "simple_reporter.log"),
-		config_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "simple_reporter.conf")):
+		config_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "simple_reporter.conf"),
+		verbose = False):
 		super(SimpleReporter, self).__init__()
 		
 		self.LOG_FILE = log_file
+		self.verbose = verbose
 		self.CONFIG_FILE = config_file
 		self._config = configparser.ConfigParser()
 		self._logger = None
@@ -132,6 +136,7 @@ class SimpleReporter(object):
 		self.TEMPLATE_FILE = "main.jinja2"
 		self._template = None
 		self.report_text = ""
+		if self.verbose: print(f"Using config file {self.CONFIG_FILE}")
 		self.rotate_logs()
 		pass
 
@@ -144,7 +149,7 @@ class SimpleReporter(object):
 		try:
 			os.rename(self.LOG_FILE, self.LOG_FILE + OLD_LOG_POSTFIX)
 		except Exception as e:
-			print(f"could not rotate log file {self.LOG_FILE}, will use unrotated file!")
+			if self.verbose: print(f"could not rotate log file {self.LOG_FILE}, will use unrotated file!")
 	
 	
 	def init_logger(self):
@@ -162,16 +167,17 @@ class SimpleReporter(object):
 		# logging
 		if os.sep not in self._config.get("main", "log_file"):
 			self.LOG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), self._config.get("main", "log_file"))
-			print(f"Using relative path to log file: {self.LOG_FILE}")
+			if self.verbose: print(f"Using relative path to log file: {self.LOG_FILE}")
 		else:
 			self.LOG_FILE = self._config.get("main", "log_file")
-			print(f"Using absolute path to log file: {self.LOG_FILE}")
+			if self.verbose: print(f"Using absolute path to log file: {self.LOG_FILE}")
 		if self._config.has_option("main", "brief_section_enabled") and self._config.get("main", "brief_section_enabled") == "yes":
 			pass
 		self.init_logger()
 	
 	
 	def _load_config_section_other(self):
+		"""load config sections that are not main and not tests"""
 		sections = self._config.sections()
 		for section in sections:
 			if section == "main": # this section should be already persed above
@@ -192,6 +198,7 @@ class SimpleReporter(object):
 		self._load_config_section_main()
 		self._load_config_section_other()
 		self._logger.debug(f"load_config: complete, file {self.CONFIG_FILE} loaded")
+		if self.verbose: print("config loaded")
 	
 	
 	def init_test_loader(self):
@@ -216,8 +223,10 @@ class SimpleReporter(object):
 		for t in self.tests:
 			try:
 				t.run()
+				if self.verbose: print(f"test {t.name} - type {t.TYPE} - complete")
 			except Exception as e:
 				self._logger.error(f"run_tests: got error while running test {t}: {e}, traceback: {traceback.format_exc()}")
+				if self.verbose: print(f"test {t.name} - type {t.TYPE} - ERROR - {e}")
 		self._logger.info("run_tests: complete")
 	
 	
@@ -241,6 +250,7 @@ class SimpleReporter(object):
 		for reporter in self.reporters:
 			reporter.send_report(self.report_text)
 		self._logger.debug("send_report: complete")
+		if self.verbose: print("report sent OK")
 	
 	
 	def save_heartbeat(self):
@@ -252,6 +262,7 @@ class SimpleReporter(object):
 		if heartbeat_test is not None:
 			save_heartbeat(heartbeat_test.heartbeat_file)
 			self._logger.info(f"save_heartbeat: saved to file {heartbeat_test.heartbeat_file}")
+			if self.verbose: print(f"heartbeat saved to file {heartbeat_test.heartbeat_file}")
 		else:
 			self._logger.error("save_heartbeat: to configured heartbeat test found in config, will not save heartbeat.")
 
@@ -265,9 +276,14 @@ if __name__ == "__main__":
 		COLLECT_ONLY = True
 	else:
 		COLLECT_ONLY = False
+	if "-v" in arguments or "--verbose" in arguments:
+		VERBOSE = True
+	else:
+		VERBOSE = False
+	
 	if "--save-heartbeat" in arguments:
 		print("Saving heartbeat only...")
-		sr = SimpleReporter()
+		sr = SimpleReporter(verbose = VERBOSE)
 		sr.load_config()
 		sr.init_template()
 		sr.init_test_loader()
@@ -276,7 +292,7 @@ if __name__ == "__main__":
 		sys.exit(0)
 	
 	
-	sr = SimpleReporter()
+	sr = SimpleReporter(verbose = VERBOSE)
 	sr.load_config()
 	sr.init_template()
 	sr.init_test_loader()
