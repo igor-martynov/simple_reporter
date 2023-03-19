@@ -65,3 +65,12 @@ type = downtime
 enabled = True
 heartbeat_period_s = 600
 heartbeat_file = /var/tmp/heartbeat
+
+[file-test1]
+type = file_content
+enabled = True
+path = /var/log/syslog
+
+[datetime-test]
+type = datetime
+enabled = True

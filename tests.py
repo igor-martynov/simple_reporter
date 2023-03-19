@@ -13,19 +13,30 @@ import glob
 
 from jinja2 import Template, Environment, FileSystemLoader, select_autoescape
 
-from base import *
+from base_functions import *
 
 
 """Test classes here.
 
-Each test checks something, and generates report
+Each test checks something, and then generates report
 
 """
 
 
 
 class BaseTest(object):
-	"""Base class for tests"""
+	"""Base class for tests
+	
+	supposed workflow is:
+		- init
+		- collect data
+		- parse data
+		- generate report
+		
+	"""
+	
+	_os_type_dict = detect_OS() # this should be static
+	
 	
 	def __init__(self, config = None, logger = None, conf_dict = None):
 		super(BaseTest, self).__init__()
@@ -34,7 +45,7 @@ class BaseTest(object):
 		self._conf_dict = conf_dict
 		self.TYPE = "test"
 		
-		self.name = "BaseTest" # this should be name of config section
+		self.name = "BaseTest" # this should be set to name of config section
 		self.descr = "BaseTest description"
 		
 		self.running = None
@@ -44,13 +55,14 @@ class BaseTest(object):
 		self.date_end = None
 		
 		self.result = ""
-		self.result_brief = ""
+		self.result_brief = None
 		self.error_text = ""
 		self.ignored = False
 		
 		self.TEMPLATE_FILE = "base_template.jinja2"
 		self._template = None
 		self._logger = logger
+		
 		
 		self.init_template()
 	
@@ -83,12 +95,21 @@ class BaseTest(object):
 	
 	
 	def run(self):
-		raise NotImplemented
+		self.mark_start()
+		self.collect()
+		self.parse()
+		self.mark_end()
+		# raise NotImplemented
 	
 	
 	def collect(self):
 		"""Collect required data"""
 		raise NotImplemented
+	
+	
+	def parse(self):
+		"""Parse collected data"""
+		pass
 	
 	
 	def mark_start(self):
@@ -114,22 +135,19 @@ class BaseCMDTest(BaseTest):
 	def __init__(self, config = None, logger = None, conf_dict = None):
 		super(BaseCMDTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
 		
-		self.name = "base_cmd_test"
+		self.name = "base_cmd_test generic name"
 		self.descr = "base command test"
 		self.CMD_TO_RUN = "df"
 		self.TYPE = "base"
 		self.raw_cmd_result = ""
-		self._os_type_dict = detect_OS()
+		
 	
 	
 	def pre_run(self):
 		self._logger.info(f"pre_run: starting, CMD_TO_RUN: {self.CMD_TO_RUN}")
-		self.mark_start()
-		self._logger.debug(f"pre_run: detected os: {self._os_type_dict}")
 		
 	
 	def post_run(self):
-		self.mark_end()
 		self._logger.debug(f"post_run: complete")
 	
 	
@@ -148,10 +166,9 @@ class BaseCMDTest(BaseTest):
 		return self.raw_cmd_result
 	
 	
-	def run(self):
+	def collect(self):
 		self.pre_run()
 		self.raw_cmd_result = self.run_cmd()
-		self.parse()
 		self.post_run()
 
 
@@ -206,7 +223,30 @@ class UptimeTest(BaseCMDTest):
 	
 	@property
 	def report_brief(self):
-		return f"Uptime: {self.raw_cmd_result}"
+		result_brief = self.raw_cmd_result.replace("\n", "")
+		return f"Uptime: {result_brief}"
+
+
+class DatetimeTest(BaseTest):
+	"""DatetimeTest - uses Python datetime"""
+	def __init__(self, config = None, logger = None, conf_dict = None):
+		super(DatetimeTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
+		self.name = "datetime"
+		self.TYPE = "datetime"
+		self.descr = "datetime test using Python datetime"
+		self._FORMAT = "%Y-%m-%d %H:%M:%S %Z"
+		pass
+	
+	def collect(self):
+		result_str = f"Date: {datetime.datetime.now().strftime(self._FORMAT)}"
+		self.result = result_str
+		self.result_brief = result_str
+		pass
+	
+	
+	def parse(self):
+		# nothing to parse here
+		pass
 
 
 
@@ -255,10 +295,11 @@ class IfconfigTest(BaseCMDTest):
 		
 	@property
 	def report_brief(self):
-		result_brief = ""
+		result_brief_list = []
 		for dev, ip in self.discovered_IPs_dict.items():
-			result_brief += f"IP {dev}: {ip}" + "\n"
-		return result_brief
+			result_brief_list.append(f"IP on {dev}: {ip}")
+		result_brief = "\n".join(result_brief_list)
+		return result_brief if result_brief != "" else None
 	
 
 
@@ -349,15 +390,14 @@ class SmartctlTest(BaseCMDTest):
 	
 	
 	def _detect_disks(self):
-		detected_os_dict = detect_OS()
 		self.detected_disks = []
-		if detected_os_dict["os_family"] == "FreeBSD":
-			disk_tmp_list = glob.glob("/dev/da*")
+		if self._os_type_dict["os_family"] == "FreeBSD":
+			disk_tmp_list = glob.glob("/dev/da*") # currently only da* disks are searched
 			self._logger.debug(f"_detect_disks: got glob result: {disk_tmp_list}")
 			for d in disk_tmp_list:
 				if "p" not in d:
 					self.detected_disks.append(d)
-		elif detected_os_dict["os_family"] == "RedHat" or detected_os_dict["os_family"] == "Debian" or detected_os_dict["os_family"] == "SuSE":
+		elif self._os_type_dict["os_family"] == "RedHat" or self._os_type_dict["os_family"] == "Debian" or self._os_type_dict["os_family"] == "SuSE":
 			disk_tmp_list = glob.glob("/dev/sd*") + glob.glob("/dev/vd*")
 			self._logger.debug(f"_detect_disks: got glob result: {disk_tmp_list}")
 			for d in disk_tmp_list:
@@ -420,7 +460,12 @@ class PingTest(BaseCMDTest):
 	
 	@property
 	def report_brief(self):
+		for l in self.raw_cmd_result.splitlines():
+			if " transmitted," in l:
+				result_brief = l.replace("\n", "")
+				return f"Ping: {result_brief}"
 		return f"Ping: {self.raw_cmd_result}"
+
 	
 	
 	def run(self):

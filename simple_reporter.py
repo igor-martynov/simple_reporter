@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-03-17
+# 2023-03-18
 
-__version__ = "0.6.2"
+__version__ = "0.6.5"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -31,7 +31,7 @@ from jinja2 import Template, Environment, FileSystemLoader, select_autoescape, B
 
 from reporters import *
 from tests import *
-from base import *
+from base_functions import *
 
 
 
@@ -43,12 +43,9 @@ class TestLoader(object):
 		self._logger = logger
 		self._config = config
 		self.tests = []
-		self.tests_table = {}
-		
+		self.tests_table = {} # dict which states which test type is handled by which class
 		self.REQUIRE_ENABLED = True
-		
 		self.init_tests_table()
-		pass
 	
 	
 	def add_test(self, test_obj):
@@ -70,10 +67,8 @@ class TestLoader(object):
 		self.tests_table["df-trivial"] = DFTrivialTest
 		self.tests_table["downtime"] = DowntimeTest
 		self.tests_table["file_content"] = FileContentTest
-		# self.tests_table[""] = 
-		
+		self.tests_table["datetime"] = DatetimeTest
 		self._logger.debug(f"init_tests_table: inited with {len(self.tests_table.keys())} test types")
-		pass
 	
 	
 	def parse_config_section(self, section):
@@ -234,7 +229,7 @@ class SimpleReporter(object):
 		os_type_dict = detect_OS()
 		self.report_text = self._template.render(version = __version__,
 			host = get_hostname(),
-			datetime = datetime.datetime.now(),
+			datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z"),
 			tests = self.tests,
 			os_type = os_type_dict["os_family"])
 		self._logger.debug("compile_report: complete")
@@ -247,6 +242,7 @@ class SimpleReporter(object):
 	
 	def send_report(self):
 		self._logger.info(f"send_report: starting, will be used reporters: {self.reporters} ({len(self.reporters)} total)")
+		if self.verbose: print("sending report...")
 		for reporter in self.reporters:
 			reporter.send_report(self.report_text)
 		self._logger.debug("send_report: complete")

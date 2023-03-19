@@ -32,7 +32,7 @@ import telegram
 
 
 from tests import *
-from base import *
+from base_functions import *
 
 
 class BaseReporter(object):
