@@ -227,6 +227,7 @@ class UptimeTest(BaseCMDTest):
 		return f"Uptime: {result_brief}"
 
 
+
 class DatetimeTest(BaseTest):
 	"""DatetimeTest - uses Python datetime"""
 	def __init__(self, config = None, logger = None, conf_dict = None):
@@ -464,7 +465,7 @@ class PingTest(BaseCMDTest):
 			if " transmitted," in l:
 				result_brief = l.replace("\n", "")
 				return f"Ping: {result_brief}"
-		return f"Ping: {self.raw_cmd_result}"
+		return f"Ping {self.host}: {self.raw_cmd_result}"
 
 	
 	

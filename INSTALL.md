@@ -8,19 +8,23 @@ FreeBSD, Linux (tested on Debian 10)
 Required python packages:
 - jinja2
 - python-telegram-bot
+- sqlalchemy
+- sqlite3
 
 
 Instructions:
 1. Install required pip packages via pip or pip3
 	pip install jinja2
 	pip install python-telegram-bot
+	pip install sqlalchemy
 
 
-2. Make sure python3-sqlite is installed
+2. Make sure python3-sqlite package is installed, as SQLite3 will be used as DB
 
 
 3. Copy dir with this project somewhere on server
 	cp -R /distrib/simple_reporter /opt/simple_reporter
+
 
 4. Copy config file ./simple_reporter.conf_sample to ./simple_reporter.conf and edit it
 

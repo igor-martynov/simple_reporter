@@ -266,7 +266,7 @@ class SimpleReporter(object):
 
 if __name__ == "__main__":
 	
-	# cmdline args
+	# cmdline args parsing
 	arguments = sys.argv[1:]
 	if "--collect-only" in arguments:
 		COLLECT_ONLY = True

@@ -17,6 +17,6 @@ smartctl - smartctl -a for each of detected disk
 ping - host ping result
 traceroute - host traceroute result
 df-trivial - trivial df output
-downtime - whether server booted from downtime, and how long it was. required to regularly save heartbeat using option --save-heartbeat
+downtime - whether server booted from downtime, and how long it was. required to regularly save heartbeat using cli option --save-heartbeat
 
 
