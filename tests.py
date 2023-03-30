@@ -140,15 +140,6 @@ class BaseCMDTest(BaseTest):
 		self.CMD_TO_RUN = "df"
 		self.TYPE = "base"
 		self.raw_cmd_result = ""
-		
-	
-	
-	def pre_run(self):
-		self._logger.info(f"pre_run: starting, CMD_TO_RUN: {self.CMD_TO_RUN}")
-		
-	
-	def post_run(self):
-		self._logger.debug(f"post_run: complete")
 	
 	
 	def parse(self):
@@ -167,9 +158,7 @@ class BaseCMDTest(BaseTest):
 	
 	
 	def collect(self):
-		self.pre_run()
 		self.raw_cmd_result = self.run_cmd()
-		self.post_run()
 
 
 
@@ -349,10 +338,10 @@ class ZFSZPoolStatusTest(BaseCMDTest):
 			self._logger.info(f"run: unsupported OS detected: {self._os_type_dict['os_family']}, returning None")
 			self.ignored = True
 			return
-		self.pre_run()
+		# self.pre_run()
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
-		self.post_run()
+		# self.post_run()
 
 
 
@@ -371,10 +360,10 @@ class ZFSZPoolListTest(BaseCMDTest):
 			self._logger.info(f"run: unsupported OS detected: {self._os_type_dict['os_family']}, returning None")
 			self.ignored = True
 			return
-		self.pre_run()
+		# self.pre_run()
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
-		self.post_run()
+		# self.post_run()
 
 
 
@@ -425,11 +414,11 @@ class SmartctlTest(BaseCMDTest):
 	
 	
 	def run(self):
-		self.pre_run()
+		# self.pre_run()
 		self._detect_disks()
 		self.run_cmd()
 		self.parse()
-		self.post_run()
+		# self.post_run()
 
 
 
@@ -449,14 +438,12 @@ class PingTest(BaseCMDTest):
 		self.TYPE = "ping"
 		self.host = ""
 		self.count = 4
-		
 	
 	
 	def init_from_conf_dict(self):
 		self.host = self._conf_dict["host"]
 		self.count = int(self._conf_dict["count"])
 		self.CMD_TO_RUN = f"ping -c {self.count} {self.host}"
-		pass
 	
 	
 	@property
@@ -468,13 +455,12 @@ class PingTest(BaseCMDTest):
 		return f"Ping {self.host}: {self.raw_cmd_result}"
 
 	
-	
 	def run(self):
 		self.init_from_conf_dict()
-		self.pre_run()
+		# self.pre_run()
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
-		self.post_run()
+		# self.post_run()
 		pass
 	
 	
@@ -491,7 +477,7 @@ class PingTest(BaseCMDTest):
 	
 
 class TracerouteTest(BaseCMDTest):
-	"""docstring for TracerouteTest"""
+	"""TracerouteTest"""
 	def __init__(self, config = None, logger = None, conf_dict = None):
 		super(TracerouteTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
 		self.name = "traceroute"
@@ -508,11 +494,64 @@ class TracerouteTest(BaseCMDTest):
 	
 	def run(self):
 		self.init_from_conf_dict()
-		self.pre_run()
+		# self.pre_run()
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
-		self.post_run()
+		# self.post_run()
 	
+
+
+class PSTest(BaseCMDTest):
+	"""PSTest"""
+	
+	def __init__(self, config = None, logger = None, conf_dict = None):
+		super(PSTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
+		self.name = "pstest"
+		self.descr = "ps aux output"
+		self.CMD_TO_RUN = "ps aux"
+		self.TYPE = "ps"
+		self.process_substr = None
+	
+	
+	def init_from_conf_dict(self):
+		if self._config.has_option(self.name, "process_substr"):
+			self.process_substr = self._conf_dict["process_substr"]
+			self._logger.debug(f"init_from_conf_dict: got process_substr = {self.process_substr}")
+		else:
+			self._logger.debug("init_from_conf_dict: no sectionin config")
+		
+		
+	
+	@property
+	def report_brief(self):
+		if self.process_substr is None:
+			self._logger.debug(f"report_brief: {self.raw_cmd_result}")
+			return f"ps: {len(self.raw_cmd_result.splitlines()) - 1} processes"
+		else:
+			tmp_result_list = []
+			for line in self.raw_cmd_result.splitlines():
+				if self.process_substr in line:
+					tmp_result_list.append(line)
+			return f"ps: {len(tmp_result_list)} processes of \"{self.process_substr}\""
+	
+	def parse(self):
+		if self.process_substr is None:
+			return None
+		result_tmp_list = []
+		
+		for line in self.raw_cmd_result.splitlines():
+			if self.process_substr in line:
+				result_tmp_list.append(line.replace("\n", ""))
+		self.result = "\n".join(result_tmp_list)
+		pass
+	
+	
+	def run(self):
+		self.init_from_conf_dict()
+		self.raw_cmd_result = self.run_cmd()
+		self.parse()
+
+
 	
 
 # TODO: under construction and testing

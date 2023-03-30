@@ -4,7 +4,7 @@
 # 
 # 2023-03-18
 
-__version__ = "0.6.5"
+__version__ = "0.6.6"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -68,6 +68,7 @@ class TestLoader(object):
 		self.tests_table["downtime"] = DowntimeTest
 		self.tests_table["file_content"] = FileContentTest
 		self.tests_table["datetime"] = DatetimeTest
+		self.tests_table["ps"] = PSTest
 		self._logger.debug(f"init_tests_table: inited with {len(self.tests_table.keys())} test types")
 	
 	
@@ -277,8 +278,8 @@ if __name__ == "__main__":
 	else:
 		VERBOSE = False
 	
-	if "--save-heartbeat" in arguments:
-		print("Saving heartbeat only...")
+	if COLLECT_ONLY or ("--save-heartbeat" in arguments):
+		print("COLLECT_ONLY: Saving heartbeat only...")
 		sr = SimpleReporter(verbose = VERBOSE)
 		sr.load_config()
 		sr.init_template()

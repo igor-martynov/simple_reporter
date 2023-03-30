@@ -6,8 +6,8 @@ Tests loaded: {{ tests | length }}
 
 
 BRIEF REPORT:
-{% for test in tests %}{% if test.report_brief is not none %}|{{ test.report_brief }}
-|{% endif %}{% endfor %}
+{% for test in tests %}{% if test.report_brief is not none %}{{ test.report_brief }}
+{% endif %}{% endfor %}
 ---
 
 
