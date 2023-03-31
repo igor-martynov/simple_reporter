@@ -38,32 +38,24 @@ class BaseTest(object):
 	_os_type_dict = detect_OS() # this should be static
 	
 	
-	def __init__(self, config = None, logger = None, conf_dict = None):
+	def __init__(self, config = None, logger = None, name = "BaseTest"):
 		super(BaseTest, self).__init__()
-		
 		self._config = config
-		self._conf_dict = conf_dict
-		self.TYPE = "test"
-		
-		self.name = "BaseTest" # this should be set to name of config section
+		self.TYPE = "BaseTest_type"
+		self.name = name # this should be set to name of config section
 		self.descr = "BaseTest description"
-		
 		self.running = None
 		self.complete = None
-		self.failed = None # result is faulty 
+		self.failed = None # if result is faulty 
 		self.date_start = None
 		self.date_end = None
-		
 		self.result = ""
 		self.result_brief = None
 		self.error_text = ""
 		self.ignored = False
-		
 		self.TEMPLATE_FILE = "base_template.jinja2"
 		self._template = None
 		self._logger = logger
-		
-		
 		self.init_template()
 	
 	
@@ -132,10 +124,9 @@ class BaseCMDTest(BaseTest):
 	
 	"""
 	
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(BaseCMDTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
+	def __init__(self, config = None, logger = None, name = "base_cmd_test generic name"):
+		super(BaseCMDTest, self).__init__(config = config, logger = logger, name = name)
 		
-		self.name = "base_cmd_test generic name"
 		self.descr = "base command test"
 		self.CMD_TO_RUN = "df"
 		self.TYPE = "base"
@@ -165,8 +156,8 @@ class BaseCMDTest(BaseTest):
 class BaseTestWithHistory(BaseTest):
 	"""docstring for BaseTestWithHistory"""
 	
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(BaseTestWithHistory, self).__init__(config = config, logger = logger, conf_dict = conf_dic)
+	def __init__(self, config = None, logger = None, name = "base_test_with_history"):
+		super(BaseTestWithHistory, self).__init__(config = config, logger = logger, name = name)
 		self._DB_table = "baseTable"
 		
 		pass
@@ -178,9 +169,9 @@ class BaseTestWithHistory(BaseTest):
 class DFTrivialTest(BaseCMDTest):
 	"""trivial df test, will use df utility and simply report df output"""
 	
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(DFTrivialTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "df-trivial"
+	def __init__(self, config = None, logger = None, name = "df-trivial"):
+		super(DFTrivialTest, self).__init__(config = config, logger = logger, name = name)
+		# self.name = "df-trivial"
 		self.descr = "disk free test (trivial)"
 		self.CMD_TO_RUN = "df"
 		self.TYPE = "df-trivial"
@@ -191,9 +182,9 @@ class DFTrivialTest(BaseCMDTest):
 class DFTest(BaseCMDTest):
 	"""extended df test, will use df utility"""
 	
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(DFTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "df"
+	def __init__(self, config = None, logger = None, name = "df"):
+		super(DFTest, self).__init__(config = config, logger = logger, name = name)
+		# self.name = "df"
 		self.descr = "disk free test"
 		self.CMD_TO_RUN = "df"
 		self.TYPE = "df"
@@ -202,9 +193,9 @@ class DFTest(BaseCMDTest):
 
 class UptimeTest(BaseCMDTest):
 	"""UptimeTest"""
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(UptimeTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "uptime"
+	def __init__(self, config = None, logger = None, name = "uptime"):
+		super(UptimeTest, self).__init__(config = config, logger = logger, name = name)
+		# self.name = "uptime"
 		self.descr = "uptime test"
 		self.CMD_TO_RUN = "uptime"
 		self.TYPE = "uptime"
@@ -219,9 +210,9 @@ class UptimeTest(BaseCMDTest):
 
 class DatetimeTest(BaseTest):
 	"""DatetimeTest - uses Python datetime"""
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(DatetimeTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "datetime"
+	def __init__(self, config = None, logger = None, name = "datetime"):
+		super(DatetimeTest, self).__init__(config = config, logger = logger, name = name)
+		# self.name = "datetime"
 		self.TYPE = "datetime"
 		self.descr = "datetime test using Python datetime"
 		self._FORMAT = "%Y-%m-%d %H:%M:%S %Z"
@@ -242,9 +233,9 @@ class DatetimeTest(BaseTest):
 
 class IfconfigTest(BaseCMDTest):
 	"""IfconfigTest"""
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(IfconfigTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "ifconfig"
+	def __init__(self, config = None, logger = None, name = "ifconfig"):
+		super(IfconfigTest, self).__init__(config = config, logger = logger, name = name)
+		# self.name = "ifconfig"
 		self.descr = "ifconfig test"
 		self.CMD_TO_RUN = "ifconfig -a"
 		self.TYPE = "ifconfig"
@@ -296,9 +287,8 @@ class IfconfigTest(BaseCMDTest):
 class DmesgTest(BaseCMDTest):
 	"""DmesgTest"""
 	
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(DmesgTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "dmesg"
+	def __init__(self, config = None, logger = None, name = "dmesg"):
+		super(DmesgTest, self).__init__(config = config, logger = logger, name = name)
 		self.descr = "last lines of dmesg output"
 		self.num_lines = 20
 		self.CMD_TO_RUN = f"dmesg"
@@ -317,7 +307,7 @@ class DmesgTest(BaseCMDTest):
 	
 	def init_from_conf_dict(self):
 		try:
-			self.num_lines = int(self._conf_dict["last_lines"])
+			self.num_lines = self._config.getint(self.name, "last_lines")
 		except Exception as e:
 			self._logger.error(f"init_from_section: got error while initing from section: {e}, traceback: {traceback.format_exc()}")
 
@@ -325,9 +315,8 @@ class DmesgTest(BaseCMDTest):
 
 class ZFSZPoolStatusTest(BaseCMDTest):
 	"""docstring for ZFSZPoolStatusTest"""
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(ZFSZPoolStatusTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "zfs"
+	def __init__(self, config = None, logger = None, name = "zfs_zpool_status"):
+		super(ZFSZPoolStatusTest, self).__init__(config = config, logger = logger, name = name)
 		self.descr = "zpool status"
 		self.CMD_TO_RUN = "zpool status"
 		self.TYPE = "zfs_zpool_status"
@@ -338,18 +327,15 @@ class ZFSZPoolStatusTest(BaseCMDTest):
 			self._logger.info(f"run: unsupported OS detected: {self._os_type_dict['os_family']}, returning None")
 			self.ignored = True
 			return
-		# self.pre_run()
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
-		# self.post_run()
 
 
 
 class ZFSZPoolListTest(BaseCMDTest):
-	"""docstring for ZFSZPoolListTest"""
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(ZFSZPoolListTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "zfs"
+	"""ZFSZPoolListTest - show output of command zpool list"""
+	def __init__(self, config = None, logger = None, name = "zfs_zpool_list"):
+		super(ZFSZPoolListTest, self).__init__(config = config, logger = logger, name = name)
 		self.descr = "zpool list"
 		self.CMD_TO_RUN = "zpool list"
 		self.TYPE = "zfs_zpool_list"
@@ -360,18 +346,15 @@ class ZFSZPoolListTest(BaseCMDTest):
 			self._logger.info(f"run: unsupported OS detected: {self._os_type_dict['os_family']}, returning None")
 			self.ignored = True
 			return
-		# self.pre_run()
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
-		# self.post_run()
 
 
 
 class SmartctlTest(BaseCMDTest):
-	"""docstring for SmartctlTest"""
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(SmartctlTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "smartctl"
+	"""SmartctlTest"""
+	def __init__(self, config = None, logger = None, name = "smartctl"):
+		super(SmartctlTest, self).__init__(config = config, logger = logger, name = name)
 		self.descr = "SMART info"
 		self.CMD_TO_RUN = "smartctl -a "
 		self.TYPE = "smartctl"
@@ -414,11 +397,9 @@ class SmartctlTest(BaseCMDTest):
 	
 	
 	def run(self):
-		# self.pre_run()
 		self._detect_disks()
 		self.run_cmd()
 		self.parse()
-		# self.post_run()
 
 
 
@@ -430,9 +411,8 @@ class PingTest(BaseCMDTest):
 	ping: ya1123132123.ru: Name or service not known
 	
 	"""
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(PingTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "ping"
+	def __init__(self, config = None, logger = None, name = "ping"):
+		super(PingTest, self).__init__(config = config, logger = logger, name = name)
 		self.descr = "ping test"
 		self.CMD_TO_RUN = "ping"
 		self.TYPE = "ping"
@@ -441,9 +421,12 @@ class PingTest(BaseCMDTest):
 	
 	
 	def init_from_conf_dict(self):
-		self.host = self._conf_dict["host"]
-		self.count = int(self._conf_dict["count"])
-		self.CMD_TO_RUN = f"ping -c {self.count} {self.host}"
+		try:
+			self.host = self._config.get(self.name, "host")
+			self.count = self._config.getint(self.name, "count")
+			self.CMD_TO_RUN = f"ping -c {self.count} {self.host}"
+		except Exception as e:
+			self._logger.error(f": got error: {e}, traceback: {traceback.format_exc()}")
 	
 	
 	@property
@@ -457,11 +440,8 @@ class PingTest(BaseCMDTest):
 	
 	def run(self):
 		self.init_from_conf_dict()
-		# self.pre_run()
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
-		# self.post_run()
-		pass
 	
 	
 	# TODO: uneder construction
@@ -478,9 +458,9 @@ class PingTest(BaseCMDTest):
 
 class TracerouteTest(BaseCMDTest):
 	"""TracerouteTest"""
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(TracerouteTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "traceroute"
+	def __init__(self, config = None, logger = None, name = "traceroute"):
+		super(TracerouteTest, self).__init__(config = config, logger = logger, name = name)
+		# self.name = "traceroute"
 		self.descr = "traceroute test"
 		self.CMD_TO_RUN = "traceroute"
 		self.TYPE = "traceroute"
@@ -488,25 +468,22 @@ class TracerouteTest(BaseCMDTest):
 	
 	
 	def init_from_conf_dict(self):
-		self.host = self._conf_dict["host"]
+		self.host = self._config.get(self.name, "host")
 		self.CMD_TO_RUN = f"traceroute {self.host}"
 	
 	
 	def run(self):
 		self.init_from_conf_dict()
-		# self.pre_run()
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
-		# self.post_run()
 	
 
 
 class PSTest(BaseCMDTest):
 	"""PSTest"""
 	
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(PSTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "pstest"
+	def __init__(self, config = None, logger = None, name = "pstest"):
+		super(PSTest, self).__init__(config = config, logger = logger, name = name)
 		self.descr = "ps aux output"
 		self.CMD_TO_RUN = "ps aux"
 		self.TYPE = "ps"
@@ -515,7 +492,7 @@ class PSTest(BaseCMDTest):
 	
 	def init_from_conf_dict(self):
 		if self._config.has_option(self.name, "process_substr"):
-			self.process_substr = self._conf_dict["process_substr"]
+			self.process_substr = self._config.get(self.name, "process_substr")
 			self._logger.debug(f"init_from_conf_dict: got process_substr = {self.process_substr}")
 		else:
 			self._logger.debug("init_from_conf_dict: no sectionin config")
@@ -538,12 +515,10 @@ class PSTest(BaseCMDTest):
 		if self.process_substr is None:
 			return None
 		result_tmp_list = []
-		
 		for line in self.raw_cmd_result.splitlines():
 			if self.process_substr in line:
 				result_tmp_list.append(line.replace("\n", ""))
 		self.result = "\n".join(result_tmp_list)
-		pass
 	
 	
 	def run(self):
@@ -557,13 +532,12 @@ class PSTest(BaseCMDTest):
 # TODO: under construction and testing
 class DowntimeTest(BaseTest):
 	"""report last downtime"""
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(DowntimeTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "downtime"
+	def __init__(self, config = None, logger = None, name = "downtime"):
+		super(DowntimeTest, self).__init__(config = config, logger = logger, name = name)
 		self.TYPE = "downtime"
 		self.descr = "downtime test"
-		self.heartbeat_file = conf_dict["heartbeat_file"]
-		self.period_s = int(conf_dict["heartbeat_period_s"])
+		self.heartbeat_file = self._config.get(self.name, "heartbeat_file")
+		self.period_s = self._config.getint(self.name, "heartbeat_period_s")
 		self.last_heartbeat = None
 		self.boot_time = None
 		self.downtime_start = None
@@ -606,28 +580,49 @@ class DowntimeTest(BaseTest):
 class FileContentTest(BaseTest):
 	"""report content of text file"""
 	
-	def __init__(self, config = None, logger = None, conf_dict = None):
-		super(FileContentTest, self).__init__(config = config, logger = logger, conf_dict = conf_dict)
-		self.name = "file_content"
+	def __init__(self, config = None, logger = None, name = "file_content"):
+		super(FileContentTest, self).__init__(config = config, logger = logger, name = name)
+		# self.name = "file_content"
 		self.TYPE = "file_content"
-		self.descr = "Get content of file"
+		self.descr = "show content of file"
 		self.path = ""
+		self.max_lines = None
+		self.total_lines = None
 		self.init_from_conf_dict()
 	
 	
 	def init_from_conf_dict(self):
-		self.path = self._conf_dict["path"]
+		self.path = self._config.get(self.name, "path")
 		self.descr = f"Сontent of file {self.path}"
-	
-	
+		self.max_lines = self._config.getint(self.name, "max_lines") if self._config.has_option(self.name, "max_lines") else None
+		self._logger.debug(f"init_from_conf_dict: got max_lines: {self.max_lines}")
+
+
 	def run(self):
 		self.mark_start()
+		self.collect()
+		self.mark_end()
+		
+		
+	def collect(self):
 		if not os.path.isfile(self.path):
 			self.failed = True
-			self._logger.error(f"run: could not find file {self.path}")
+			self._logger.error(f"collect: could not find file {self.path}")
 			return False
 		with open(self.path, "r") as f:
-			self.result = f.read()
-			self._logger.debug(f"length of file: {len(self.result)}")
-		self.mark_end()
+			full_file_content = f.read()
+		lines_list = full_file_content.splitlines()
+		self.total_lines = len(lines_list)
+		self._logger.debug(f"collect: num of strings: {self.total_lines}")
+		if self.max_lines is None:
+			self._logger.debug(f"collect: max_lines not defined in config, reporting full file {self.path}")
+			self.result = full_file_content
+		else:
+			if self.total_lines > self.max_lines:
+				self._logger.debug(f"collect: cropping file to {self.max_lines} lines")
+				self.result = "\n".join(lines_list[- self.max_lines:])
+			else:
+				self._logger.debug(f"collect: max_lines IS defined in config, but total_lines < max_lines, so reporting full file {self.path}")
+				self.result = full_file_content
+		self._logger.debug(f"collect: length of file: {len(self.result)}")
 

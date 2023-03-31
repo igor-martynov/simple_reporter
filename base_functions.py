@@ -84,6 +84,8 @@ def parse_uptime(uptime_str):
 	"""
 	currently has error in parsing
 	20:17:33 up 2 days, 57 min,  1 user,  load average: 0.25, 0.06, 0.02
+	11:26:47 up 4 days, 45 min,  1 user,  load average: 0.07, 0.02, 0.00
+
 	"""
 	uptime_timedelta = None
 	days = 0
@@ -106,7 +108,7 @@ def parse_uptime(uptime_str):
 		else:
 			substr_no_day = substr		
 		if "min" in substr: # if uptime is counted in minutes (0..59 min)
-			minutes = int(substr.split(" min")[0])
+			minutes = int(substr.split(" min")[0].split(", ")[1])
 		else:
 			hours = int(substr_no_day.split(":")[0])
 			minutes = int(substr_no_day.split(":")[1])

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-03-18
+# 2023-03-31
 
-__version__ = "0.6.6"
+__version__ = "0.6.7"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -78,20 +78,21 @@ class TestLoader(object):
 			self._logger.info(f"parse_config_section: section {section} is disabled, ignoring")
 			return
 		_type = self._config.get(section, "type")
-		_name = section
+		_name = section # this is redundand, but still persist
 		if _type in self.tests_table.keys():
 			self.create_test(_type, section, _name)
-			self._logger.debug(f"parse_config_section: section {section} parsed, test created")
+			self._logger.debug(f"parse_config_section: section {section} parsed, test {_name} created")
 		else:
-			self._logger.error(f"parse_config_section: could not find type {_type} in tests_table")
+			self._logger.error(f"parse_config_section: could not find type {_type} in tests_table, ignoring section")
 			return
 	
 	
 	def create_test(self, _type, section, _name):
 		self._logger.debug(f"create_test: will create test for type {_type}, section: {section}")
 		cls = self.tests_table[_type]
-		new_test = cls(logger = self._logger.getChild(self._config.get(section, "type") + "_" + section), config = self._config, conf_dict = self._config[section])
-		new_test.name = _name
+		new_test = cls(logger = self._logger.getChild(self._config.get(section, "type") + "_" + section),
+			config = self._config,
+			name = _name)
 		self.add_test(new_test)
 	
 	
@@ -180,7 +181,6 @@ class SimpleReporter(object):
 				continue
 			# reporter-email
 			if self._config.get(section, "type") == "reporter-email" and self._config.get(section, "enabled") == "True":
-				# conf_dict = self._config[section]
 				self._logger.debug(f"_load_config_section_other: got section for reporter-email: {section}")
 				self.reporters.append(EmailReporter(config = self._config, logger = self._logger.getChild("EmailReporter")))
 			# reporter-file
@@ -230,9 +230,9 @@ class SimpleReporter(object):
 		os_type_dict = detect_OS()
 		self.report_text = self._template.render(version = __version__,
 			host = get_hostname(),
-			datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+			datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 			tests = self.tests,
-			os_type = os_type_dict["os_family"])
+			os_type_dict = os_type_dict)
 		self._logger.debug("compile_report: complete")
 	
 	
