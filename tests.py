@@ -163,8 +163,6 @@ class BaseTestWithHistory(BaseTest):
 		pass
 	
 	
-		
-
 
 class DFTrivialTest(BaseCMDTest):
 	"""trivial df test, will use df utility and simply report df output"""
@@ -185,7 +183,7 @@ class DFTest(BaseCMDTest):
 	def __init__(self, config = None, logger = None, name = "df"):
 		super(DFTest, self).__init__(config = config, logger = logger, name = name)
 		# self.name = "df"
-		self.descr = "disk free test"
+		self.descr = "disk free test using df command"
 		self.CMD_TO_RUN = "df"
 		self.TYPE = "df"
 
@@ -196,7 +194,7 @@ class UptimeTest(BaseCMDTest):
 	def __init__(self, config = None, logger = None, name = "uptime"):
 		super(UptimeTest, self).__init__(config = config, logger = logger, name = name)
 		# self.name = "uptime"
-		self.descr = "uptime test"
+		self.descr = "system uptime using uptime command"
 		self.CMD_TO_RUN = "uptime"
 		self.TYPE = "uptime"
 	
@@ -214,7 +212,7 @@ class DatetimeTest(BaseTest):
 		super(DatetimeTest, self).__init__(config = config, logger = logger, name = name)
 		# self.name = "datetime"
 		self.TYPE = "datetime"
-		self.descr = "datetime test using Python datetime"
+		self.descr = "system date and time time using Python datetime"
 		self._FORMAT = "%Y-%m-%d %H:%M:%S %Z"
 		pass
 	
@@ -235,11 +233,9 @@ class IfconfigTest(BaseCMDTest):
 	"""IfconfigTest"""
 	def __init__(self, config = None, logger = None, name = "ifconfig"):
 		super(IfconfigTest, self).__init__(config = config, logger = logger, name = name)
-		# self.name = "ifconfig"
-		self.descr = "ifconfig test"
+		self.descr = "network interfaces test using ifconfig"
 		self.CMD_TO_RUN = "ifconfig -a"
 		self.TYPE = "ifconfig"
-		
 		self.discovered_IPs = []
 		self.discovered_IPs_dict = {}
 		
@@ -314,7 +310,7 @@ class DmesgTest(BaseCMDTest):
 
 
 class ZFSZPoolStatusTest(BaseCMDTest):
-	"""docstring for ZFSZPoolStatusTest"""
+	"""ZFSZPoolStatusTest"""
 	def __init__(self, config = None, logger = None, name = "zfs_zpool_status"):
 		super(ZFSZPoolStatusTest, self).__init__(config = config, logger = logger, name = name)
 		self.descr = "zpool status"
@@ -355,7 +351,7 @@ class SmartctlTest(BaseCMDTest):
 	"""SmartctlTest"""
 	def __init__(self, config = None, logger = None, name = "smartctl"):
 		super(SmartctlTest, self).__init__(config = config, logger = logger, name = name)
-		self.descr = "SMART info"
+		self.descr = "SMART info using smartctl command"
 		self.CMD_TO_RUN = "smartctl -a "
 		self.TYPE = "smartctl"
 		self.detected_disks = []
@@ -498,7 +494,6 @@ class PSTest(BaseCMDTest):
 			self._logger.debug("init_from_conf_dict: no sectionin config")
 		
 		
-	
 	@property
 	def report_brief(self):
 		if self.process_substr is None:
@@ -510,6 +505,7 @@ class PSTest(BaseCMDTest):
 				if self.process_substr in line:
 					tmp_result_list.append(line)
 			return f"ps: {len(tmp_result_list)} processes of \"{self.process_substr}\""
+	
 	
 	def parse(self):
 		if self.process_substr is None:
@@ -526,7 +522,6 @@ class PSTest(BaseCMDTest):
 		self.raw_cmd_result = self.run_cmd()
 		self.parse()
 
-
 	
 
 # TODO: under construction and testing
@@ -535,7 +530,7 @@ class DowntimeTest(BaseTest):
 	def __init__(self, config = None, logger = None, name = "downtime"):
 		super(DowntimeTest, self).__init__(config = config, logger = logger, name = name)
 		self.TYPE = "downtime"
-		self.descr = "downtime test"
+		self.descr = "downtime test using internal functions"
 		self.heartbeat_file = self._config.get(self.name, "heartbeat_file")
 		self.period_s = self._config.getint(self.name, "heartbeat_period_s")
 		self.last_heartbeat = None
@@ -582,7 +577,6 @@ class FileContentTest(BaseTest):
 	
 	def __init__(self, config = None, logger = None, name = "file_content"):
 		super(FileContentTest, self).__init__(config = config, logger = logger, name = name)
-		# self.name = "file_content"
 		self.TYPE = "file_content"
 		self.descr = "show content of file"
 		self.path = ""
@@ -607,6 +601,7 @@ class FileContentTest(BaseTest):
 	def collect(self):
 		if not os.path.isfile(self.path):
 			self.failed = True
+			self.result = f"file {self.path} is not present"
 			self._logger.error(f"collect: could not find file {self.path}")
 			return False
 		with open(self.path, "r") as f:
@@ -625,4 +620,49 @@ class FileContentTest(BaseTest):
 				self._logger.debug(f"collect: max_lines IS defined in config, but total_lines < max_lines, so reporting full file {self.path}")
 				self.result = full_file_content
 		self._logger.debug(f"collect: length of file: {len(self.result)}")
+
+
+
+# TODO: under construction and testing
+class ServiceTest(BaseCMDTest):
+	"""ServiceTest - show status of service"""
+	
+	def __init__(self, config = None, logger = None, name = "servicetest"):
+		super(ServiceTest, self).__init__(config = config, logger = logger, name = name)
+		self.descr = "service status"
+		self.CMD_TO_RUN = ""
+		self.TYPE = "service"
+		self.service_name = ""
+		self.systemctl_is_used = False
+	
+	
+	def init_from_conf_dict(self):
+		if self._config.has_option(self.name, "service_name"):
+			self.service_name = self._config.get(self.name, "service_name")
+			self.descr = f"status of {self.service_name} service"
+			self._logger.debug(f"init_from_conf_dict: got service_name = {self.service_name}")
+		else:
+			self._logger.error("init_from_conf_dict: no section in config")
+		if (self._os_type_dict["os_family"] == "RedHat" and self._os_type_dict["major_version"] >= 7) \
+			or (self._os_type_dict["os_family"] == "SuSE" and self._os_type_dict["major_version"] >= 12) \
+			or (self._os_type_dict["os_family"] == "Debian" and self._os_type_dict["major_version"] >= 10):
+			self.systemctl_is_used = True
+			self.CMD_TO_RUN = f"systemctl status {self.service_name}"
+		if (self._os_type_dict["os_family"] == "RedHat" and self._os_type_dict["major_version"] < 7) \
+			or (self._os_type_dict["os_family"] == "SuSE" and self._os_type_dict["major_version"] < 12) \
+			or (self._os_type_dict["os_family"] == "Debian" and self._os_type_dict["major_version"] < 10) \
+			or (self._os_type_dict["os_family"] == "FreeBSD"):
+			self.systemctl_is_used = False
+			self.CMD_TO_RUN = f"service {self.service_name} status"
+	
+	
+	def parse(self):
+		if self.service_name == "":
+			return None
+		if self.systemctl_is_used:
+			if self.raw_cmd_result == "-1":
+				self.error = True
+				self.result = f"got error running systemctl, please check configuration"
+				return
+
 
