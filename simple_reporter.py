@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-03-31
+# 2023-04-16
 
 __version__ = "0.6.7"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
@@ -69,6 +69,8 @@ class TestLoader(object):
 		self.tests_table["file_content"] = FileContentTest
 		self.tests_table["datetime"] = DatetimeTest
 		self.tests_table["ps"] = PSTest
+		self.tests_table["service"] = ServiceTest
+		self.tests_table["ifconfigme"] = IfconfigMeTest
 		self._logger.debug(f"init_tests_table: inited with {len(self.tests_table.keys())} test types")
 	
 	
@@ -90,6 +92,7 @@ class TestLoader(object):
 	def create_test(self, _type, section, _name):
 		self._logger.debug(f"create_test: will create test for type {_type}, section: {section}")
 		cls = self.tests_table[_type]
+		# new_test = cls(logger = self._logger.getChild(self._config.get(section, "type") + "_" + section),
 		new_test = cls(logger = self._logger.getChild(self._config.get(section, "type") + "_" + section),
 			config = self._config,
 			name = _name)
@@ -158,6 +161,7 @@ class SimpleReporter(object):
 		fh.setFormatter(formatter)
 		self._logger.addHandler(fh)
 		self._logger.debug("======== simple_reporter starting, version " + __version__ + " ========")
+		self._logger.info(f"using config {self.CONFIG_FILE}")
 	
 	
 	def _load_config_section_main(self):
@@ -264,8 +268,27 @@ class SimpleReporter(object):
 			self._logger.error("save_heartbeat: to configured heartbeat test found in config, will not save heartbeat.")
 
 
+def determine_config():
+	# determine config
+	
+	# current user
+	current_user = get_current_user()
+	current_user_home = f"/home/{current_user}" if current_user != "root" else "/root"
+	CONFIG_FILE_NAME = "simple_reporter.conf"
+	CONFIG_FILE_LIST = [f"/etc/{CONFIG_FILE_NAME}",
+		f"{current_user_home}/{CONFIG_FILE_NAME}",
+		os.path.join(os.path.abspath(os.path.dirname(__file__)), CONFIG_FILE_NAME),
+		f"./{CONFIG_FILE_NAME}", ]
+	
+	for c in CONFIG_FILE_LIST:
+		if os.path.isfile(c):
+			return c
+	
 
 if __name__ == "__main__":
+	CONFIG_FILE = determine_config()	
+
+	
 	
 	# cmdline args parsing
 	arguments = sys.argv[1:]
@@ -280,7 +303,7 @@ if __name__ == "__main__":
 	
 	if COLLECT_ONLY or ("--save-heartbeat" in arguments):
 		print("COLLECT_ONLY: Saving heartbeat only...")
-		sr = SimpleReporter(verbose = VERBOSE)
+		sr = SimpleReporter(verbose = VERBOSE, config_file = CONFIG_FILE)
 		sr.load_config()
 		sr.init_template()
 		sr.init_test_loader()
@@ -289,7 +312,7 @@ if __name__ == "__main__":
 		sys.exit(0)
 	
 	
-	sr = SimpleReporter(verbose = VERBOSE)
+	sr = SimpleReporter(verbose = VERBOSE, config_file = CONFIG_FILE)
 	sr.load_config()
 	sr.init_template()
 	sr.init_test_loader()

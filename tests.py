@@ -666,3 +666,14 @@ class ServiceTest(BaseCMDTest):
 				return
 
 
+
+class IfconfigMeTest(BaseCMDTest):
+	"""IfconfigMeTest"""
+	
+	def __init__(self, config = None, logger = None, name = "ifconfigme"):
+		super(IfconfigMeTest, self).__init__(config = config, logger = logger, name = name)
+		self.descr = "request extermal IP address from ifconfig.me web service"
+		self.TYPE = "ifconfigme"
+		self.URL = "https://ifconfig.me/ip"
+		self.CMD_TO_RUN = f"curl -s {self.URL}"
+

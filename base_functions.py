@@ -65,17 +65,25 @@ def detect_OS():
 	if os.path.isfile("/bin/freebsd-version"):
 		result_dict["os_family"] = "FreeBSD"
 	# version
-	if result_dict["os_family"] == "Debian":
-		with open("/etc/debian_version", "r") as f:
-			content = f.read()
-			result_dict["major_version"], result_dict["minor_version"] = content.replace("\n", "").split(".")
+	try:
+		if result_dict["os_family"] == "Debian":
+			with open("/etc/debian_version", "r") as f:
+				content = f.read()
+				major, minor = content.replace("\n", "").split(".")
+				result_dict["major_version"] = int(major)
+				result_dict["minor_version"] = int(minor)
+	except Exception as e:
+		print(f"detect_OS: os_family is {result_dict['os_family']}, could not parse major_version or minor_version: {str(e)}, exception: {traceback.format_exc()}")
 	if result_dict["os_family"] == "FreeBSD":
 		try:
 			tmp = run_command("freebsd-version")
-			result_dict["major_version"], result_dict["minor_version"] = tmp.split("-")[0].split(".")
+			major, minor = tmp.split("-")[0].split(".")
+			result_dict["major_version"] = int(major)
+			result_dict["minor_version"] = int(minor)
 		except Exception as e:
+			print(f"detect_OS: os_family is {result_dict['os_family']}, could not parse major_version or minor_version: {str(e)}, exception: {traceback.format_exc()}")
 			pass
-	# print(f"D detected os: {result_dict}")
+	print(f"D detected os: {result_dict}")
 	return result_dict
 
 
@@ -263,4 +271,7 @@ class send_mail3(object):
 			pass
 
 
+def get_current_user():
+	import getpass
+	return getpass.getuser()
 
