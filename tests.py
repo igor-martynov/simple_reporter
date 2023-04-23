@@ -430,7 +430,7 @@ class PingTest(BaseCMDTest):
 		for l in self.raw_cmd_result.splitlines():
 			if " transmitted," in l:
 				result_brief = l.replace("\n", "")
-				return f"Ping: {result_brief}"
+				return f"Ping {self.host}: {result_brief}"
 		return f"Ping {self.host}: {self.raw_cmd_result}"
 
 	

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-04-16
+# 2023-04-20
 
 __version__ = "0.6.7"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
@@ -292,6 +292,12 @@ if __name__ == "__main__":
 	
 	# cmdline args parsing
 	arguments = sys.argv[1:]
+	if "-h" in arguments or "--help" in arguments:
+		print("""Usage:
+	--collect-only - only collect data and save state (if possible), do not report
+	-v, --verbose - be verbose
+	""")
+		sys.exit(0)
 	if "--collect-only" in arguments:
 		COLLECT_ONLY = True
 	else:
@@ -300,8 +306,16 @@ if __name__ == "__main__":
 		VERBOSE = True
 	else:
 		VERBOSE = False
+	message = None
+	if "-m" in arguments or "--message" in arguments:
+		if "--message" in arguments:
+			pos = arguments.index("--message")
+		else:
+			pos = arguments.index("-m")
+		message = arguments[pos + 1]
+		
 	
-	if COLLECT_ONLY or ("--save-heartbeat" in arguments):
+	if COLLECT_ONLY:
 		print("COLLECT_ONLY: Saving heartbeat only...")
 		sr = SimpleReporter(verbose = VERBOSE, config_file = CONFIG_FILE)
 		sr.load_config()
