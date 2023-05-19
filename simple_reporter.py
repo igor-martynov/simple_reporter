@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-04-20
+# 2023-05-08
 
-__version__ = "0.6.7"
+__version__ = "0.6.8"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -44,7 +44,7 @@ class TestLoader(object):
 		self._config = config
 		self.tests = []
 		self.tests_table = {} # dict which states which test type is handled by which class
-		self.REQUIRE_ENABLED = True
+		self.REQUIRE_ENABLED = False
 		self.init_tests_table()
 	
 	
@@ -54,6 +54,7 @@ class TestLoader(object):
 	
 	
 	def init_tests_table(self):
+		# currently, new test should be added to self.tests_table with its type as key
 		self.tests_table = {}
 		self.tests_table["df"] = DFTest
 		self.tests_table["ifconfig"] = IfconfigTest
@@ -71,6 +72,7 @@ class TestLoader(object):
 		self.tests_table["ps"] = PSTest
 		self.tests_table["service"] = ServiceTest
 		self.tests_table["ifconfigme"] = IfconfigMeTest
+		self.tests_table["file_exist"] = FileExistTest
 		self._logger.debug(f"init_tests_table: inited with {len(self.tests_table.keys())} test types")
 	
 	
@@ -129,6 +131,10 @@ class SimpleReporter(object):
 		self.tests = []
 		self.reporters = []
 		self._test_loader = None
+		
+		self.tests_failed = []
+		self.tests_ignored = []
+		self.tests_OK = []
 		
 		# 
 		self.heartbeat_file = "/var/tmp/heartbeat"
@@ -218,6 +224,13 @@ class SimpleReporter(object):
 		self._template = env.get_template(self.TEMPLATE_FILE)
 	
 	
+	def init_all(self):
+		self.load_config()
+		self.init_template()
+		self.init_test_loader()
+		self.init_tests()
+	
+	
 	def run_tests(self):
 		self._logger.info(f"run_tests: starting execution of tests - {len(self.tests)} in list")
 		for t in self.tests:
@@ -228,6 +241,19 @@ class SimpleReporter(object):
 				self._logger.error(f"run_tests: got error while running test {t}: {e}, traceback: {traceback.format_exc()}")
 				if self.verbose: print(f"test {t.name} - type {t.TYPE} - ERROR - {e}")
 		self._logger.info("run_tests: complete")
+	
+	
+	def get_simple_stats(self):
+		self.tests_failed = []
+		self.tests_ignored = []
+		self.tests_OK = []
+		for t in self.tests:
+			if t.failed:
+				self.tests_failed.append(t)
+			elif not t.failed and not t.ignored:
+				self.tests_OK.append(t)
+			elif t.ignored:
+				self.tests_ignored.append(t)
 	
 	
 	def compile_report(self):
@@ -314,23 +340,16 @@ if __name__ == "__main__":
 			pos = arguments.index("-m")
 		message = arguments[pos + 1]
 		
+	sr = SimpleReporter(verbose = VERBOSE, config_file = CONFIG_FILE)
+	sr.init_all()
+	
 	
 	if COLLECT_ONLY:
 		print("COLLECT_ONLY: Saving heartbeat only...")
-		sr = SimpleReporter(verbose = VERBOSE, config_file = CONFIG_FILE)
-		sr.load_config()
-		sr.init_template()
-		sr.init_test_loader()
-		sr.init_tests()
 		sr.save_heartbeat()
 		sys.exit(0)
 	
 	
-	sr = SimpleReporter(verbose = VERBOSE, config_file = CONFIG_FILE)
-	sr.load_config()
-	sr.init_template()
-	sr.init_test_loader()
-	sr.init_tests()
 	sr.run_tests()
 	if not COLLECT_ONLY:
 		sr.compile_report()

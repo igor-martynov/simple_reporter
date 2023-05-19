@@ -190,7 +190,8 @@ class DFTest(BaseCMDTest):
 
 
 class UptimeTest(BaseCMDTest):
-	"""UptimeTest"""
+	"""checks system uptime"""
+	
 	def __init__(self, config = None, logger = None, name = "uptime"):
 		super(UptimeTest, self).__init__(config = config, logger = logger, name = name)
 		# self.name = "uptime"
@@ -207,7 +208,8 @@ class UptimeTest(BaseCMDTest):
 
 
 class DatetimeTest(BaseTest):
-	"""DatetimeTest - uses Python datetime"""
+	"""checks system datetime with Python datetime class"""
+	
 	def __init__(self, config = None, logger = None, name = "datetime"):
 		super(DatetimeTest, self).__init__(config = config, logger = logger, name = name)
 		# self.name = "datetime"
@@ -230,7 +232,7 @@ class DatetimeTest(BaseTest):
 
 
 class IfconfigTest(BaseCMDTest):
-	"""IfconfigTest"""
+	"""checks network configuration"""
 	def __init__(self, config = None, logger = None, name = "ifconfig"):
 		super(IfconfigTest, self).__init__(config = config, logger = logger, name = name)
 		self.descr = "network interfaces test using ifconfig"
@@ -281,7 +283,7 @@ class IfconfigTest(BaseCMDTest):
 
 
 class DmesgTest(BaseCMDTest):
-	"""DmesgTest"""
+	"""checks dmesg output"""
 	
 	def __init__(self, config = None, logger = None, name = "dmesg"):
 		super(DmesgTest, self).__init__(config = config, logger = logger, name = name)
@@ -453,7 +455,8 @@ class PingTest(BaseCMDTest):
 	
 
 class TracerouteTest(BaseCMDTest):
-	"""TracerouteTest"""
+	"""checks traceroute"""
+	
 	def __init__(self, config = None, logger = None, name = "traceroute"):
 		super(TracerouteTest, self).__init__(config = config, logger = logger, name = name)
 		# self.name = "traceroute"
@@ -476,7 +479,7 @@ class TracerouteTest(BaseCMDTest):
 
 
 class PSTest(BaseCMDTest):
-	"""PSTest"""
+	"""checks process list with ps utility"""
 	
 	def __init__(self, config = None, logger = None, name = "pstest"):
 		super(PSTest, self).__init__(config = config, logger = logger, name = name)
@@ -592,10 +595,10 @@ class FileContentTest(BaseTest):
 		self._logger.debug(f"init_from_conf_dict: got max_lines: {self.max_lines}")
 
 
-	def run(self):
-		self.mark_start()
-		self.collect()
-		self.mark_end()
+	# def run(self):
+	# 	self.mark_start()
+	# 	self.collect()
+	# 	self.mark_end()
 		
 		
 	def collect(self):
@@ -623,9 +626,44 @@ class FileContentTest(BaseTest):
 
 
 
+class FileExistTest(BaseTest):
+	"""Check if path exist and it's a file. Otherwise fail"""
+	
+	def __init__(self, config = None, logger = None, name = "file_exist"):
+		super(FileExistTest, self).__init__(config = config, logger = logger, name = name)
+		self.TYPE = "file_exist"
+		self.descr = "check if file exist"
+		self._file_exist = None
+		self._file_size = None
+		self._file_perm = None
+		self.init_from_conf_dict()
+		
+	
+	def init_from_conf_dict(self):
+		self.path = self._config.get(self.name, "path")
+		self.descr = f"check if file {self.path} exist"
+	
+	
+	def collect(self):
+		if not os.path.isfile(self.path):
+			self.failed = True
+			self.result = f"file {self.path} is not present"
+			self._logger.error(f"collect: could not find file {self.path}")
+			return False
+		self._file_exist = True
+		self._logger.info(f"collect: file exist: {self.path}")
+	
+	
+	def parse(self):
+		if not self._file_exist:
+			self.result = f"file {self.path} does not exist"
+			return
+		self.result = f"file {self.path} exist"
+
+
 # TODO: under construction and testing
 class ServiceTest(BaseCMDTest):
-	"""ServiceTest - show status of service"""
+	"""Show status of target service self.service_name"""
 	
 	def __init__(self, config = None, logger = None, name = "servicetest"):
 		super(ServiceTest, self).__init__(config = config, logger = logger, name = name)
@@ -668,7 +706,7 @@ class ServiceTest(BaseCMDTest):
 
 
 class IfconfigMeTest(BaseCMDTest):
-	"""IfconfigMeTest"""
+	"""Test outer IP using web service ifconfig.me/ip"""
 	
 	def __init__(self, config = None, logger = None, name = "ifconfigme"):
 		super(IfconfigMeTest, self).__init__(config = config, logger = logger, name = name)
