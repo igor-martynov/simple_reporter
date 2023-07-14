@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-05-08
+# 2023-07-11
 
 __version__ = "0.6.8"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
@@ -44,7 +44,7 @@ class TestLoader(object):
 		self._config = config
 		self.tests = []
 		self.tests_table = {} # dict which states which test type is handled by which class
-		self.REQUIRE_ENABLED = False
+		self.REQUIRE_ENABLED = False # True if section will be loaded only if enabled = True
 		self.init_tests_table()
 	
 	
@@ -73,6 +73,7 @@ class TestLoader(object):
 		self.tests_table["service"] = ServiceTest
 		self.tests_table["ifconfigme"] = IfconfigMeTest
 		self.tests_table["file_exist"] = FileExistTest
+		self.tests_table["remote_fs"] = RemoteFSTest
 		self._logger.debug(f"init_tests_table: inited with {len(self.tests_table.keys())} test types")
 	
 	
@@ -332,6 +333,10 @@ if __name__ == "__main__":
 		VERBOSE = True
 	else:
 		VERBOSE = False
+	if "-c" in arguments:
+		CONFIG_FILE = arguments[arguments.index("-c") + 1]
+	if "--config" in arguments:
+		CONFIG_FILE = arguments[arguments.index("--config") + 1]
 	message = None
 	if "-m" in arguments or "--message" in arguments:
 		if "--message" in arguments:
@@ -339,6 +344,7 @@ if __name__ == "__main__":
 		else:
 			pos = arguments.index("-m")
 		message = arguments[pos + 1]
+		
 		
 	sr = SimpleReporter(verbose = VERBOSE, config_file = CONFIG_FILE)
 	sr.init_all()

@@ -349,6 +349,32 @@ class ZFSZPoolListTest(BaseCMDTest):
 
 
 
+class RemoteFSTest(BaseCMDTest):
+	"""RemoteFSTest - show mounted remote FSs, like nfs or smb"""
+	def __init__(self, config = None, logger = None, name = "remote_fs_test"):
+		super(RemoteFSTest, self).__init__(config = config, logger = logger, name = name)
+		self.descr = "list of remote FS mounted"
+		self.CMD_TO_RUN = "df -hT" 
+		self.TYPE = "remote_fs"
+		self.SUPPORTED_FS = ["nfs", "cifs", "smb", "sshfs"]
+	
+	
+	def parse(self):
+		self.result = ""
+		raw_lines = []
+		try:
+			for l in self.raw_cmd_result.splitlines():
+				for fs in self.SUPPORTED_FS:
+					if fs in l:
+						raw_lines.append(l)
+		except Exception as e:
+			self._logger.error(f"parse: got error {e}, traceback: {traceback.format_exc()}")
+			return
+		for rl in raw_lines:
+			self.result += rl + "\n"
+
+
+
 class SmartctlTest(BaseCMDTest):
 	"""SmartctlTest"""
 	def __init__(self, config = None, logger = None, name = "smartctl"):
@@ -593,12 +619,6 @@ class FileContentTest(BaseTest):
 		self.descr = f"Сontent of file {self.path}"
 		self.max_lines = self._config.getint(self.name, "max_lines") if self._config.has_option(self.name, "max_lines") else None
 		self._logger.debug(f"init_from_conf_dict: got max_lines: {self.max_lines}")
-
-
-	# def run(self):
-	# 	self.mark_start()
-	# 	self.collect()
-	# 	self.mark_end()
 		
 		
 	def collect(self):

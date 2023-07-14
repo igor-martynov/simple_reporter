@@ -58,10 +58,24 @@ def detect_OS():
 	# os_family
 	if os.path.isfile("/etc/redhat-release"):
 		result_dict["os_family"] = "RedHat"
+		if os.path.isfile("/etc/oracle-release"):
+			result_dict["distribution"] = "Oracle Linux"
+		elif os.path.isfile("/etc/centos-release"):
+			result_dict["distribution"] = "CentOS"
+		else:
+			result_dict["distribution"] = "Red Hat Enterprise Linux"
 	if os.path.isfile("/etc/SuSE-release"):
 		result_dict["os_family"] = "SuSE"
+		result_dict["distribution"] = "SuSE"
 	if os.path.isfile("/etc/debian_version"):
 		result_dict["os_family"] = "Debian"
+		if os.path.isfile("/etc/issue"):
+			with open("/etc/issue", "r") as f:
+				content = f.read()
+				if "Ubuntu" in content:
+					result_dict["distribution"] = "Ubuntu"
+				elif "Debian" in content:
+					result_dict["distribution"] = "Debian"
 	if os.path.isfile("/bin/freebsd-version"):
 		result_dict["os_family"] = "FreeBSD"
 	# version
@@ -83,7 +97,7 @@ def detect_OS():
 		except Exception as e:
 			print(f"detect_OS: os_family is {result_dict['os_family']}, could not parse major_version or minor_version: {str(e)}, exception: {traceback.format_exc()}")
 			pass
-	print(f"D detected os: {result_dict}")
+	# print(f"D detected os: {result_dict}")
 	return result_dict
 
 

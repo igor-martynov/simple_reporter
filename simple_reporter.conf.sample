@@ -33,35 +33,29 @@ filename = report.txt
 
 [zfs-zpool-status]
 type = zfs_zpool_status
-enabled = True
 
 
 [zfs-zpool-list]
 type = zfs_zpool_list
-enabled = True
 
 
 [df-test]
 type = df-trivial
-enabled = True
 
 
 [ifconfig-test]
 # show ifconfig. although supports brief form
 type = ifconfig
-enabled = True
 
 
 [uptime-test]
 # show uptime output
 type = uptime
-enabled = True
 
 
 [dmesg-test]
 # show dmesg output
 type = dmesg
-enabled = True
 # if defined, show that much lines
 last_lines = 10
 
@@ -69,20 +63,17 @@ last_lines = 10
 [smartctl-test]
 # show smartctl of detected disks
 type = smartctl
-enabled = True
 
 
 [traceroute-test]
 # show traceroute to host
 type = traceroute
-enabled = True
 host = 8.8.8.8
 
 
 [downtime-test]
 # show last downtime
 type = downtime
-enabled = True
 heartbeat_period_s = 600
 heartbeat_file = /var/tmp/heartbeat
 
@@ -90,19 +81,22 @@ heartbeat_file = /var/tmp/heartbeat
 [file-test1]
 # show content of file
 type = file_content
-enabled = True
 path = /var/log/syslog
 
 
 [datetime-test]
 # show date and time
 type = datetime
-enabled = True
+
 
 
 [ps-test]
 # show process list
 type = ps
-enabled = True
 # if process_substr is defined, then show only lines which contain this substring
 process_substr = python
+
+
+[remotefs-test]
+type = remote_fs
+
