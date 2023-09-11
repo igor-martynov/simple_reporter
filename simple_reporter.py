@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-07-11
+# 2023-09-11
 
-__version__ = "0.6.8"
+__version__ = "0.6.9"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -128,7 +128,6 @@ class SimpleReporter(object):
 		self._config = configparser.ConfigParser()
 		self._logger = None
 		
-		# 
 		self.tests = []
 		self.reporters = []
 		self._test_loader = None
@@ -137,7 +136,6 @@ class SimpleReporter(object):
 		self.tests_ignored = []
 		self.tests_OK = []
 		
-		# 
 		self.heartbeat_file = "/var/tmp/heartbeat"
 		
 		self.TEMPLATE_FILE = "main.jinja2"
@@ -145,7 +143,6 @@ class SimpleReporter(object):
 		self.report_text = ""
 		if self.verbose: print(f"Using config file {self.CONFIG_FILE}")
 		self.rotate_logs()
-		pass
 
 	
 	def rotate_logs(self):
@@ -263,7 +260,8 @@ class SimpleReporter(object):
 			host = get_hostname(),
 			datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 			tests = self.tests,
-			os_type_dict = os_type_dict)
+			os_type_dict = os_type_dict,
+			config_file = self.CONFIG_FILE)
 		self._logger.debug("compile_report: complete")
 	
 	
@@ -315,9 +313,7 @@ def determine_config():
 if __name__ == "__main__":
 	CONFIG_FILE = determine_config()	
 
-	
-	
-	# cmdline args parsing
+	# dumb cmdline args parsing
 	arguments = sys.argv[1:]
 	if "-h" in arguments or "--help" in arguments:
 		print("""Usage:

@@ -1,0 +1,5 @@
+# reboot
+@reboot		root		sleep 60 && cd /opt/simple_reporter && /usr/bin/python3 ./simple_reporter.py
+
+00 12 * * *	root		cd /opt/simple_reporter && /usr/bin/python3 ./simple_reporter.py
+

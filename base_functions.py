@@ -80,12 +80,24 @@ def detect_OS():
 		result_dict["os_family"] = "FreeBSD"
 	# version
 	try:
-		if result_dict["os_family"] == "Debian":
+		if result_dict["os_family"] == "Debian" and result_dict["distribution"] == "Debian":
 			with open("/etc/debian_version", "r") as f:
 				content = f.read()
 				major, minor = content.replace("\n", "").split(".")
 				result_dict["major_version"] = int(major)
 				result_dict["minor_version"] = int(minor)
+		if result_dict["os_family"] == "Debian" and result_dict["distribution"] == "Ubuntu":
+			with open("/etc/issue", "r") as f:
+				content_list = f.readlines()
+				for line in content_list:
+					if "Ubuntu" in line:
+						tmp_list = content.replace("\n", "").replace("Ubuntu ", "").replace(" LTS ", "").split(".")
+						if len(tmp_list) >= 2:
+							major, minor = tmp_list[0], tmp_list[1]
+							result_dict["major_version"] = int(major)
+							result_dict["minor_version"] = int(minor)
+						else:
+							raise
 	except Exception as e:
 		print(f"detect_OS: os_family is {result_dict['os_family']}, could not parse major_version or minor_version: {str(e)}, exception: {traceback.format_exc()}")
 	if result_dict["os_family"] == "FreeBSD":
@@ -96,8 +108,6 @@ def detect_OS():
 			result_dict["minor_version"] = int(minor)
 		except Exception as e:
 			print(f"detect_OS: os_family is {result_dict['os_family']}, could not parse major_version or minor_version: {str(e)}, exception: {traceback.format_exc()}")
-			pass
-	# print(f"D detected os: {result_dict}")
 	return result_dict
 
 

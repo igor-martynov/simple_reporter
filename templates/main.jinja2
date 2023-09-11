@@ -1,8 +1,9 @@
 Simple Report v.{{ version }}
 Host: {{ host }}
 Date: {{ datetime }}
-OS: {{ os_type_dict["os_family"] }}
+OS: {{ os_type_dict["distribution"] }}, version: {{ os_type_dict["major_version"] }}.{{ os_type_dict["minor_version"] }}
 Tests loaded: {{ tests | length }}
+Config: {{ config_file }}
 
 
 BRIEF REPORT:
