@@ -114,39 +114,46 @@ def detect_OS():
 # TODO: tested in Linux, should be tested more
 def parse_uptime(uptime_str):
 	"""
-	currently has error in parsing
-	20:17:33 up 2 days, 57 min,  1 user,  load average: 0.25, 0.06, 0.02
+	parse uptime as datetime.timedelta from uptime_str
 	11:26:47 up 4 days, 45 min,  1 user,  load average: 0.07, 0.02, 0.00
-
+	
+	
+	3:12:20 up 37 min,  1 user,  load average: 0.20, 0.15, 0.16
+	23:57:24 up  1:22,  1 user,  load average: 0.15, 0.09, 0.06
+	20:44:13 up 5 days, 10:01,  3 users,  load average: 0.08, 0.02, 0.01
 	"""
 	uptime_timedelta = None
 	days = 0
 	hours = 0
 	minutes = 0
-	
 	try:
 		# stage1 - get substring
-		substr1 = uptime_str.split(" up ")[1]
-		substr2 = substr1.split(" user")[0]
-		sublist3 = substr2.split(", ")
-		substr = ", ".join(sublist3[:-1])
-		
+		substr_stage1 = uptime_str.split(" up ")[1]
+		substr_stage2 = substr_stage1.split(" user")[0]
+		sublist_stage3 = substr_stage2.split(", ")
+		substr_stage4 = ", ".join(sublist_stage3[:-1])
+		print(f"substr_stage4: {substr_stage4}...")
 		# stage2 - parse substring into ints
-		if "day" in substr: # if uptime is more than 1 day
-			days = int(substr.split(" day")[0])
-			substr_no_day = substr.split("days, ")[1] if "days, " in substr else substr.split("day, ")[1]
-			if substr_no_day.startswith(" "):
-				substr_no_day = substr_no_day[1:]
+		if "day" in substr_stage4 and "min" not in substr_stage4: # if uptime is more than 1 day and 1 hour
+			# 20:44:13 up 5 days, 10:01,  3 users,  load average: 0.08, 0.02, 0.01
+			days = int(substr_stage4.split(" day")[0])
+			hours = int(substr_stage4.split(", ")[1].split(":")[0])
+			minutes = int(substr_stage4.split(", ")[1].split(":")[1])
+		elif "day" in substr_stage4 and "min" in substr_stage4:
+			# 20:17:33 up 2 days, 57 min,  1 user,  load average: 0.25, 0.06, 0.02
+			days = int(substr_stage4.split(" day")[0])
+			minutes = int(substr_stage4.split(" min")[0].split(", ")[1])
+		elif "day" not in substr_stage4 and "min" in substr_stage4:
+			# 3:12:20 up 37 min,  1 user,  load average: 0.20, 0.15, 0.16
+			minutes = int(substr_stage4.split(" min")[0])
+		elif "day" not in substr_stage4 and "min" not in substr_stage4:
+			hours = int(substr_stage4.replace(" ", "").split(":")[0])
+			minutes = int(substr_stage4.replace(" ", "").split(":")[1])
 		else:
-			substr_no_day = substr		
-		if "min" in substr: # if uptime is counted in minutes (0..59 min)
-			minutes = int(substr.split(" min")[0].split(", ")[1])
-		else:
-			hours = int(substr_no_day.split(":")[0])
-			minutes = int(substr_no_day.split(":")[1])
-		
+			raise NotImplemented
 	except Exception as e:
 		print(f"parse_uptime: got exception {e}, traceback: {traceback.format_exc()}")
+	# print(f"D d: {days}, h: {hours}, m: {minutes}")
 	return datetime.timedelta(days = days, hours = hours, minutes = minutes)
 
 
