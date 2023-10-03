@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-10-02
+# 2023-10-03
 
-__version__ = "0.6.10"
+__version__ = "0.7.0"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -265,6 +265,11 @@ class SimpleReporter(object):
 		self._logger.debug("compile_report: complete")
 	
 	
+	def send_message(self, message):
+		self.report_text = f"\n{message}\n"
+		self.send_report()
+		
+	
 	def add_test(self, test_obj):
 		self.tests.append(test_obj)
 		self._logger.debug(f"add_test: added test {test_obj} ({test_obj.descr})")
@@ -318,6 +323,7 @@ if __name__ == "__main__":
 	if "-h" in arguments or "--help" in arguments:
 		print("""Usage:
 	--collect-only - only collect data and save state (if possible), do not report
+	-m, --message - send message only, do not collect
 	-v, --verbose - be verbose
 	""")
 		sys.exit(0)
@@ -339,8 +345,8 @@ if __name__ == "__main__":
 			pos = arguments.index("--message")
 		else:
 			pos = arguments.index("-m")
-		message = arguments[pos + 1]
-		
+		message = " ".join(arguments[pos + 1:])
+	
 		
 	sr = SimpleReporter(verbose = VERBOSE, config_file = CONFIG_FILE)
 	sr.init_all()
@@ -349,6 +355,9 @@ if __name__ == "__main__":
 	if COLLECT_ONLY:
 		print("COLLECT_ONLY: Saving heartbeat only...")
 		sr.save_heartbeat()
+		sys.exit(0)
+	if message is not None:
+		sr.send_message(message)
 		sys.exit(0)
 	
 	

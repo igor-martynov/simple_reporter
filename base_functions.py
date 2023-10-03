@@ -132,7 +132,6 @@ def parse_uptime(uptime_str):
 		substr_stage2 = substr_stage1.split(" user")[0]
 		sublist_stage3 = substr_stage2.split(", ")
 		substr_stage4 = ", ".join(sublist_stage3[:-1])
-		print(f"substr_stage4: {substr_stage4}...")
 		# stage2 - parse substring into ints
 		if "day" in substr_stage4 and "min" not in substr_stage4: # if uptime is more than 1 day and 1 hour
 			# 20:44:13 up 5 days, 10:01,  3 users,  load average: 0.08, 0.02, 0.01

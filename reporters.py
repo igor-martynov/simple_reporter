@@ -59,9 +59,18 @@ class EmailReporter(send_mail3, BaseReporter):
 	This is wrapper class for send_mail3. Jinja2 is used for subject template.
 	Therefore email_subject in config - is string that is parsed as template"""
 	
-	def __init__(self, config = None, logger = None, sender = "", to = [], subject = "", message = ""):
+	def __init__(self, config = None,
+		logger = None,
+		sender = "",
+		to = [],
+		subject = "",
+		message = ""):
 		# super(EmailReporter, self).__init__(logger = logger, config = config, sender = sender, to = to, subject = subject, message = message)
-		send_mail3.__init__(self, sender = sender, to = to, subject = subject, message = message, logger = logger)
+		send_mail3.__init__(self, sender = sender,
+			to = to,
+			subject = subject,
+			message = message,
+			logger = logger)
 		BaseReporter.__init__(self, logger = logger, config = config)
 		self.RECIPIENT_DIVIDER = ","
 		self.type = "reporter-email"
