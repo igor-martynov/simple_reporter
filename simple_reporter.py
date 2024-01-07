@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # 
 # 
-# 2023-10-03
+# 2024-01-03
 
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 __author__ = "Igor Martynov (phx.planewalker@gmail.com)"
 
 
@@ -20,8 +20,6 @@ import datetime
 import time
 import configparser
 import socket
-
-# logging
 import logging
 import logging.handlers
 
@@ -74,6 +72,7 @@ class TestLoader(object):
 		self.tests_table["ifconfigme"] = IfconfigMeTest
 		self.tests_table["file_exist"] = FileExistTest
 		self.tests_table["remote_fs"] = RemoteFSTest
+		self.tests_table["du"] = DUTest
 		self._logger.debug(f"init_tests_table: inited with {len(self.tests_table.keys())} test types")
 	
 	
@@ -109,7 +108,7 @@ class TestLoader(object):
 			if section == "main":
 				continue
 			self.parse_config_section(section)
-		self._logger.info("load_all: complete")
+		self._logger.info(f"load_all: complete, loaded tests: {[_test.name for _test in self.tests]}")
 		
 
 

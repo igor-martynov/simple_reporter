@@ -17,8 +17,7 @@ from base_functions import *
 
 
 """Test classes here.
-
-Each test checks something, and then generates report
+Each test checks something, and then generates report.
 
 """
 
@@ -32,7 +31,6 @@ class BaseTest(object):
 		- collect data
 		- parse data
 		- generate report
-		
 	"""
 	
 	_os_type_dict = detect_OS() # this should be static
@@ -216,13 +214,12 @@ class DatetimeTest(BaseTest):
 		self.TYPE = "datetime"
 		self.descr = "system date and time time using Python datetime"
 		self._FORMAT = "%Y-%m-%d %H:%M:%S %Z"
-		pass
+	
 	
 	def collect(self):
 		result_str = f"Date: {datetime.datetime.now().strftime(self._FORMAT)}"
 		self.result = result_str
 		self.result_brief = result_str
-		pass
 	
 	
 	def parse(self):
@@ -726,12 +723,36 @@ class ServiceTest(BaseCMDTest):
 
 
 class IfconfigMeTest(BaseCMDTest):
-	"""Test outer IP using web service ifconfig.me/ip"""
+	"""Test outer IP using public web service ifconfig.me/ip"""
 	
-	def __init__(self, config = None, logger = None, name = "ifconfigme"):
+	def __init__(self, config = None, logger = None, name = "ifconfigmetest"):
 		super(IfconfigMeTest, self).__init__(config = config, logger = logger, name = name)
 		self.descr = "request extermal IP address from ifconfig.me web service"
 		self.TYPE = "ifconfigme"
 		self.URL = "https://ifconfig.me/ip"
 		self.CMD_TO_RUN = f"curl -s {self.URL}"
+
+
+
+class DUTest(BaseCMDTest):
+	"""Test disk usage (using du) of dir"""
+	
+	def __init__(self, config = None, logger = None, name = "dutest"):
+		super(DUTest, self).__init__(config = config, logger = logger, name = name)
+		self.descr = "simple du (disk usage) test"
+		self.TYPE = "du"
+		# self.CMD_TO_RUN = f"du -sh"
+		self.summarize = False
+		self._dive_into_subdirs = False
+		self.init_from_conf_dict()
+		
+	
+	def init_from_conf_dict(self):
+		self._dive_into_subdirs = True if self._config.get(self.name, "path") == "True" else False
+		self.path = self._config.get(self.name, "path")
+		self.summarize = True if (self._config.has_option(self.name, "summarize") and self._config.get(self.name, "summarize") == "True") else False
+		# self.CMD_TO_RUN = f"du -sh {os.path.join(self.path, '*')}"
+		self.CMD_TO_RUN = f"du -sh {self.path}" if self.summarize else f"du -h {self.path}"
+		pass
+
 
