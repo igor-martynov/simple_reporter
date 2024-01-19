@@ -152,13 +152,11 @@ class BaseCMDTest(BaseTest):
 
 
 class BaseTestWithHistory(BaseTest):
-	"""docstring for BaseTestWithHistory"""
+	"""BaseTestWithHistory - use this as parent if you need test with history"""
 	
 	def __init__(self, config = None, logger = None, name = "base_test_with_history"):
 		super(BaseTestWithHistory, self).__init__(config = config, logger = logger, name = name)
 		self._DB_table = "baseTable"
-		
-		pass
 	
 	
 
@@ -229,7 +227,7 @@ class DatetimeTest(BaseTest):
 
 
 class IfconfigTest(BaseCMDTest):
-	"""checks network configuration"""
+	"""checks network configuration using ifconfig utility"""
 	def __init__(self, config = None, logger = None, name = "ifconfig"):
 		super(IfconfigTest, self).__init__(config = config, logger = logger, name = name)
 		self.descr = "network interfaces test using ifconfig"
@@ -315,6 +313,20 @@ class ZFSZPoolStatusTest(BaseCMDTest):
 		self.descr = "zpool status"
 		self.CMD_TO_RUN = "zpool status"
 		self.TYPE = "zfs_zpool_status"
+	
+	
+	def parse(self):
+		if "state: DEGRADED" in self.raw_cmd_result:
+			self.error_text += "ONE OR MORE POOL DEGRADED!"
+			self.failed = True
+		if "state: UNAVAIL" in self.raw_cmd_result:
+			self.error_text += "ONE OR MORE POOL UNAVAILABLE!"
+			self.failed = True
+		if "state: FAULTED" in self.raw_cmd_result:
+			if "state: UNAVAIL" in self.raw_cmd_result:
+				self.error_text += "ONE OR MORE POOL HAS FAILED!"
+				self.failed = True
+		super(ZFSZPoolStatusTest, self).parse()	
 		
 	
 	def run(self):
